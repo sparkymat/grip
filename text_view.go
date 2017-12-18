@@ -6,7 +6,7 @@ type TextView struct {
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	Text            string
-	area            area
+	Area            area
 	height          uint32
 	width           uint32
 	x               uint32
@@ -14,7 +14,7 @@ type TextView struct {
 }
 
 func (t *TextView) GetArea() area {
-	return t.area
+	return t.Area
 }
 
 func (t *TextView) Resize(x, y, width, height uint32) {

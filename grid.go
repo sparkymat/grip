@@ -7,6 +7,7 @@ import (
 )
 
 type grid struct {
+	area         area
 	columnSizes  []size.Size
 	rowSizes     []size.Size
 	columnWidths []uint32
@@ -18,11 +19,15 @@ type grid struct {
 	windowHeight uint32
 }
 
-func NewGrid(columnSizes []size.Size, rowSizes []size.Size) grid {
+func NewGrid(columnSizes []size.Size, rowSizes []size.Size, area area) grid {
 	width, height := termbox.Size()
 	columnWidths := distributeLength(uint32(width), columnSizes)
 	rowHeights := distributeLength(uint32(height), rowSizes)
-	return grid{columnSizes, rowSizes, columnWidths, rowHeights, []View{}, 0, 0, uint32(width), uint32(height)}
+	return grid{area, columnSizes, rowSizes, columnWidths, rowHeights, []View{}, 0, 0, uint32(width), uint32(height)}
+}
+
+func (g *grid) GetArea() area {
+	return g.area
 }
 
 func (g *grid) AddView(v View) {
