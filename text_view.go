@@ -6,14 +6,14 @@ type TextView struct {
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	Text            string
-	Area            area
+	Area            Area
 	height          uint32
 	width           uint32
 	x               uint32
 	y               uint32
 }
 
-func (t *TextView) GetArea() area {
+func (t *TextView) GetArea() Area {
 	return t.Area
 }
 

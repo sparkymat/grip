@@ -1,6 +1,6 @@
 package grip
 
-type area struct {
+type Area struct {
 	ColumnStart uint32
 	ColumnEnd   uint32
 	RowStart    uint32

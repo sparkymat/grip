@@ -7,63 +7,57 @@ import (
 )
 
 type grid struct {
-	area         area
 	columnSizes  []size.Size
 	rowSizes     []size.Size
 	columnWidths []uint32
 	rowHeights   []uint32
-	views        []View
+	cells        []cell
 	windowX      uint32
 	windowY      uint32
 	windowWidth  uint32
 	windowHeight uint32
 }
 
-func NewGrid(columnSizes []size.Size, rowSizes []size.Size, area area) grid {
+func NewGrid(columnSizes []size.Size, rowSizes []size.Size) grid {
 	width, height := termbox.Size()
 	columnWidths := distributeLength(uint32(width), columnSizes)
 	rowHeights := distributeLength(uint32(height), rowSizes)
-	return grid{area, columnSizes, rowSizes, columnWidths, rowHeights, []View{}, 0, 0, uint32(width), uint32(height)}
+	return grid{columnSizes, rowSizes, columnWidths, rowHeights, []cell{}, 0, 0, uint32(width), uint32(height)}
 }
 
-func (g *grid) GetArea() area {
-	return g.area
-}
-
-func (g *grid) AddView(v View) {
-	g.views = append(g.views, v)
+func (g *grid) AddView(v View, a Area) {
+	g.cells = append(g.cells, cell{v, a})
 }
 
 func (g *grid) Resize(x, y, width, height uint32) {
 	g.columnWidths = distributeLength(uint32(width), g.columnSizes)
 	g.rowHeights = distributeLength(uint32(height), g.rowSizes)
 
-	for _, view := range g.views {
-		area := view.GetArea()
+	for _, cell := range g.cells {
 		var xOffset uint32 = 0
 		var yOffset uint32 = 0
 		var viewWidth uint32 = 0
 		var viewHeight uint32 = 0
 		var i uint32
 
-		for i = 0; i < area.ColumnStart; i++ {
+		for i = 0; i < cell.area.ColumnStart; i++ {
 			xOffset += g.columnWidths[i]
 		}
 
-		for i = area.ColumnStart; i <= area.ColumnEnd; i++ {
+		for i = cell.area.ColumnStart; i <= cell.area.ColumnEnd; i++ {
 			viewWidth += g.columnWidths[i]
 		}
 
-		for i = 0; i < area.RowStart; i++ {
+		for i = 0; i < cell.area.RowStart; i++ {
 			yOffset += g.rowHeights[i]
 		}
 
-		for i = area.RowStart; i <= area.RowEnd; i++ {
+		for i = cell.area.RowStart; i <= cell.area.RowEnd; i++ {
 			viewHeight += g.rowHeights[i]
 		}
 
 		pretty.Logf("Resize(%d, %d, %d, %d)\n", x+xOffset, y+yOffset, viewWidth, viewHeight)
-		view.Resize(x+xOffset, y+yOffset, viewWidth, viewHeight)
+		cell.view.Resize(x+xOffset, y+yOffset, viewWidth, viewHeight)
 	}
 }
 
@@ -97,7 +91,7 @@ func distributeLength(totalLength uint32, sizes []size.Size) []uint32 {
 }
 
 func (g grid) Draw() {
-	for _, view := range g.views {
-		view.Draw()
+	for _, cell := range g.cells {
+		cell.view.Draw()
 	}
 }
