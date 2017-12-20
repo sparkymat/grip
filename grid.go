@@ -1,12 +1,16 @@
 package grip
 
 import (
+	"os"
+
 	"github.com/kr/pretty"
 	termbox "github.com/nsf/termbox-go"
+	"github.com/sparkymat/grip/event"
 	"github.com/sparkymat/grip/size"
 )
 
 type grid struct {
+	app          *app
 	columnSizes  []size.Size
 	rowSizes     []size.Size
 	columnWidths []uint32
@@ -22,7 +26,44 @@ func NewGrid(columnSizes []size.Size, rowSizes []size.Size) grid {
 	width, height := termbox.Size()
 	columnWidths := distributeLength(uint32(width), columnSizes)
 	rowHeights := distributeLength(uint32(height), rowSizes)
-	return grid{columnSizes, rowSizes, columnWidths, rowHeights, []cell{}, 0, 0, uint32(width), uint32(height)}
+
+	return grid{
+		columnSizes:  columnSizes,
+		rowSizes:     rowSizes,
+		columnWidths: columnWidths,
+		rowHeights:   rowHeights,
+		cells:        []cell{},
+		windowX:      0,
+		windowY:      0,
+		windowWidth:  uint32(width),
+		windowHeight: uint32(height),
+	}
+}
+
+func (g *grid) RegisteredEvents() []event.Type {
+	return []event.Type{event.GlobalKeyPress}
+}
+
+func (g *grid) OnEvent(e event.Event) {
+	switch e.Type {
+	case event.GlobalKeyPress:
+		termboxEvent := e.Data.(termbox.Event)
+		if termboxEvent.Key == termbox.KeyEsc {
+			os.Exit(0)
+		}
+		break
+	}
+}
+
+func (g *grid) SetApp(app *app) {
+	g.app = app
+
+	for _, cell := range g.cells {
+		cell.view.SetApp(app)
+		for _, eventType := range cell.view.RegisteredEvents() {
+			app.registerEventListener(eventType, cell.view)
+		}
+	}
 }
 
 func (g *grid) AddView(v View, a Area) {

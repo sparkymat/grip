@@ -1,8 +1,12 @@
 package grip
 
-import "github.com/nsf/termbox-go"
+import (
+	"github.com/nsf/termbox-go"
+	"github.com/sparkymat/grip/event"
+)
 
 type TextView struct {
+	app             *app
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	Text            string
@@ -13,8 +17,12 @@ type TextView struct {
 	y               uint32
 }
 
-func (t *TextView) GetArea() Area {
-	return t.Area
+func (t *TextView) SetApp(app *app) {
+	t.app = app
+}
+
+func (t *TextView) RegisteredEvents() []event.Type {
+	return []event.Type{}
 }
 
 func (t *TextView) Resize(x, y, width, height uint32) {
@@ -35,4 +43,7 @@ func (t *TextView) Draw() {
 			termbox.SetCell(int(i), int(j), char, t.ForegroundColor, t.BackgroundColor)
 		}
 	}
+}
+
+func (t *TextView) OnEvent(e event.Event) {
 }

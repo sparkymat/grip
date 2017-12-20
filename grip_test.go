@@ -1,27 +1,19 @@
 package grip
 
 import (
-	"os"
 	"testing"
 
 	termbox "github.com/nsf/termbox-go"
+	"github.com/sparkymat/grip/event"
 	"github.com/sparkymat/grip/size"
 )
 
-func HandleEvents(eventChannel <-chan termbox.Event) {
-	event := <-eventChannel
-
-	switch event.Type {
-	case termbox.EventKey:
-		if event.Key == termbox.KeyEsc {
-			termbox.Close()
-			os.Exit(0)
-		}
-	}
-}
-
 func TestSanity(t *testing.T) {
 	app := New()
+
+	app.RegisterEvents(
+		event.GlobalKeyPress,
+	)
 
 	mainGrid := NewGrid(
 		[]size.Size{size.Auto, size.WithPercent(30)},
@@ -59,16 +51,15 @@ func TestSanity(t *testing.T) {
 
 	mainGrid.AddView(&sidebarGrid, Area{1, 1, 0, 1})
 
-	mainGrid.AddView(&TextView{
-		Text:            "CommandArea",
-		ForegroundColor: termbox.ColorWhite,
-		BackgroundColor: termbox.ColorRed,
+	mainGrid.AddView(&InputView{
+		TextView: TextView{
+			Text:            "",
+			ForegroundColor: termbox.ColorWhite,
+			BackgroundColor: termbox.ColorRed,
+		},
 	}, Area{0, 0, 1, 1})
 
 	app.SetRootNode(&mainGrid)
 
-	eventChannel := make(chan termbox.Event)
-	go HandleEvents(eventChannel)
-
-	app.Run(eventChannel)
+	app.Run()
 }
