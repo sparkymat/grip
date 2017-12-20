@@ -1,12 +1,27 @@
 package grip
 
 import (
+	"os"
 	"testing"
 
 	termbox "github.com/nsf/termbox-go"
 	"github.com/sparkymat/grip/event"
 	"github.com/sparkymat/grip/size"
 )
+
+type TestEventHandler struct{}
+
+func (t TestEventHandler) OnEvent(e event.Event) {
+	switch e.Type {
+	case event.GlobalKeyPress:
+		termboxEvent := e.Data.(termbox.Event)
+		if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyEsc {
+			termbox.Close()
+			os.Exit(0)
+		}
+		break
+	}
+}
 
 func TestSanity(t *testing.T) {
 	app := New()
@@ -60,6 +75,9 @@ func TestSanity(t *testing.T) {
 	}, Area{0, 0, 1, 1})
 
 	app.SetRootNode(&mainGrid)
+
+	v := TestEventHandler{}
+	app.RegisterEventListener(event.GlobalKeyPress, v)
 
 	app.Run()
 }

@@ -9,11 +9,11 @@ import (
 
 type app struct {
 	rootNode       *grid
-	eventListeners map[event.Type][]View
+	eventListeners map[event.Type][]event.EventHandler
 }
 
 func New() app {
-	eventListeners := make(map[event.Type][]View)
+	eventListeners := make(map[event.Type][]event.EventHandler)
 	return app{
 		eventListeners: eventListeners,
 	}
@@ -21,16 +21,16 @@ func New() app {
 
 func (a *app) RegisterEvents(eventTypes ...event.Type) {
 	for _, eventType := range eventTypes {
-		a.eventListeners[eventType] = []View{}
+		a.eventListeners[eventType] = []event.EventHandler{}
 	}
 }
 
-func (a *app) registerEventListener(eventType event.Type, view View) error {
+func (a *app) RegisterEventListener(eventType event.Type, handler event.EventHandler) error {
 	if _, ok := a.eventListeners[eventType]; !ok {
 		return errors.New("Unregistered event")
 	}
 
-	listeners := append(a.eventListeners[eventType], view)
+	listeners := append(a.eventListeners[eventType], handler)
 	a.eventListeners[eventType] = listeners
 
 	return nil
@@ -52,7 +52,7 @@ func (a *app) SetRootNode(node *grid) {
 	a.rootNode = node
 	a.rootNode.SetApp(a)
 	for _, eventType := range a.rootNode.RegisteredEvents() {
-		a.registerEventListener(eventType, a.rootNode)
+		a.RegisterEventListener(eventType, a.rootNode)
 	}
 }
 
@@ -72,6 +72,8 @@ func (a app) Run() error {
 	a.rootNode.Resize(0, 0, uint32(width), uint32(height))
 	a.rootNode.Draw()
 	termbox.Flush()
+
+	// FIXME: FLush every 16 ms ?
 
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
