@@ -17,7 +17,7 @@ func (t *InputView) SetApp(app *app) {
 
 func (t *InputView) RegisteredEvents() []event.Type {
 	return []event.Type{
-		event.GlobalKeyPress,
+		event.SystemKeyPress,
 	}
 }
 
@@ -31,7 +31,7 @@ func (t *InputView) Draw() {
 
 func (t *InputView) OnEvent(e event.Event) {
 	switch e.Type {
-	case event.GlobalKeyPress:
+	case event.SystemKeyPress:
 		ev := e.Data.(termbox.Event)
 		switch ev.Type {
 		case termbox.EventKey:
@@ -40,7 +40,6 @@ func (t *InputView) OnEvent(e event.Event) {
 			buffer.WriteRune(ev.Ch)
 			t.TextView.Text = buffer.String()
 			t.Draw()
-			termbox.Flush()
 			return
 		}
 		return

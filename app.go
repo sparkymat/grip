@@ -2,6 +2,7 @@ package grip
 
 import (
 	"errors"
+	"time"
 
 	termbox "github.com/nsf/termbox-go"
 	"github.com/sparkymat/grip/event"
@@ -74,6 +75,13 @@ func (a app) Run() error {
 	termbox.Flush()
 
 	// FIXME: FLush every 16 ms ?
+	refreshTicker := time.NewTicker(time.Millisecond * 16)
+	go func() {
+		for t := range refreshTicker.C {
+			a.BroadcastEvent(event.SystemTick, t)
+			termbox.Flush()
+		}
+	}()
 
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
@@ -83,12 +91,16 @@ func (a app) Run() error {
 			a.rootNode.Resize(0, 0, uint32(width), uint32(height))
 			a.rootNode.Draw()
 			termbox.Flush()
+			break
 		case termbox.EventKey:
-			a.BroadcastEvent(event.GlobalKeyPress, ev)
+			a.BroadcastEvent(event.SystemKeyPress, ev)
+			break
 		case termbox.EventError:
 			panic(ev.Err)
 		}
 	}
+
+	refreshTicker.Stop()
 
 	return err
 }

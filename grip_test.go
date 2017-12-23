@@ -13,7 +13,7 @@ type TestEventHandler struct{}
 
 func (t TestEventHandler) OnEvent(e event.Event) {
 	switch e.Type {
-	case event.GlobalKeyPress:
+	case event.SystemKeyPress:
 		termboxEvent := e.Data.(termbox.Event)
 		if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyEsc {
 			termbox.Close()
@@ -27,7 +27,7 @@ func TestSanity(t *testing.T) {
 	app := New()
 
 	app.RegisterEvents(
-		event.GlobalKeyPress,
+		event.SystemKeyPress,
 	)
 
 	mainGrid := NewGrid(
@@ -77,7 +77,7 @@ func TestSanity(t *testing.T) {
 	app.SetRootNode(&mainGrid)
 
 	v := TestEventHandler{}
-	app.RegisterEventListener(event.GlobalKeyPress, v)
+	app.RegisterEventListener(event.SystemKeyPress, v)
 
 	app.Run()
 }
