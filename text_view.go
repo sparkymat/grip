@@ -47,3 +47,6 @@ func (t *TextView) Draw() {
 
 func (t *TextView) OnEvent(e event.Event) {
 }
+
+func (t *TextView) OnLoad() {
+}

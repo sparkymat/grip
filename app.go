@@ -26,15 +26,13 @@ func (a *app) RegisterEvents(eventTypes ...event.Type) {
 	}
 }
 
-func (a *app) RegisterEventListener(eventType event.Type, handler event.EventHandler) error {
+func (a *app) RegisterEventListener(eventType event.Type, handler event.EventHandler) {
 	if _, ok := a.eventListeners[eventType]; !ok {
-		return errors.New("Unregistered event")
+		panic("Unregistered event")
 	}
 
 	listeners := append(a.eventListeners[eventType], handler)
 	a.eventListeners[eventType] = listeners
-
-	return nil
 }
 
 func (a *app) BroadcastEvent(eventType event.Type, data interface{}) error {
@@ -43,7 +41,7 @@ func (a *app) BroadcastEvent(eventType event.Type, data interface{}) error {
 	}
 
 	for _, registeredView := range a.eventListeners[eventType] {
-		registeredView.OnEvent(event.Event{eventType, data})
+		go registeredView.OnEvent(event.Event{eventType, data})
 	}
 
 	return nil
@@ -71,6 +69,7 @@ func (a app) Run() error {
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	width, height := termbox.Size()
 	a.rootNode.Resize(0, 0, uint32(width), uint32(height))
+	a.rootNode.OnLoad()
 	a.rootNode.Draw()
 	termbox.Flush()
 

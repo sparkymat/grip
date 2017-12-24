@@ -1,7 +1,6 @@
 package grip
 
 import (
-	"github.com/kr/pretty"
 	termbox "github.com/nsf/termbox-go"
 	"github.com/sparkymat/grip/event"
 	"github.com/sparkymat/grip/size"
@@ -40,6 +39,12 @@ func NewGrid(columnSizes []size.Size, rowSizes []size.Size) grid {
 
 func (g *grid) RegisteredEvents() []event.Type {
 	return []event.Type{}
+}
+
+func (g *grid) OnLoad() {
+	for _, cell := range g.cells {
+		cell.view.OnLoad()
+	}
 }
 
 func (g *grid) OnEvent(e event.Event) {
@@ -87,7 +92,6 @@ func (g *grid) Resize(x, y, width, height uint32) {
 			viewHeight += g.rowHeights[i]
 		}
 
-		pretty.Logf("Resize(%d, %d, %d, %d)\n", x+xOffset, y+yOffset, viewWidth, viewHeight)
 		cell.view.Resize(x+xOffset, y+yOffset, viewWidth, viewHeight)
 	}
 }

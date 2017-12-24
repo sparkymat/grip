@@ -29,6 +29,7 @@ func TestSanity(t *testing.T) {
 
 	app.RegisterEvents(
 		event.SystemKeyPress,
+		event.SystemTick,
 	)
 
 	mainGrid := NewGrid(
@@ -38,7 +39,7 @@ func TestSanity(t *testing.T) {
 
 	sidebarGrid := NewGrid(
 		[]size.Size{size.Auto},
-		[]size.Size{size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.Auto},
+		[]size.Size{size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.Auto},
 	)
 
 	sidebarGrid.AddView(&TextView{
@@ -68,14 +69,19 @@ func TestSanity(t *testing.T) {
 		progress.CurrentValue += 200
 		progress.Draw()
 	}()
-
 	sidebarGrid.AddView(&progress, Area{0, 0, 2, 2})
+
+	sidebarGrid.AddView(&ActivityView{
+		BackgroundColor: termbox.ColorRed,
+		ForegroundColor: termbox.ColorWhite,
+		Text:            "Loading...",
+	}, Area{0, 0, 3, 3})
 
 	sidebarGrid.AddView(&TextView{
 		Text:            "SidebarArea - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu consectetur lacus. Sed tincidunt eros non ultrices commodo. Sed ornare id dolor sed ultricies. Duis in est at nulla pretium mattis ac quis quam. Maecenas nibh nisi, rhoncus quis iaculis sit amet, semper et diam. Aenean pharetra ex non mi placerat rhoncus. Vivamus erat ante, suscipit vitae aliquet id, congue et dolor. Curabitur sed tortor tortor. Duis non sem et lacus ultrices finibus quis quis felis. Integer non elementum ante. Vestibulum vel augue ut tortor condimentum pulvinar eu blandit leo. Donec nibh nibh, tincidunt vitae risus a, consectetur suscipit felis. Quisque elementum velit nec mauris tristique, id malesuada tellus dictum.",
 		ForegroundColor: termbox.ColorWhite,
 		BackgroundColor: termbox.ColorBlue,
-	}, Area{0, 0, 3, 3})
+	}, Area{0, 0, 4, 4})
 
 	mainGrid.AddView(&TextView{
 		Text:            "MainArea",

@@ -45,3 +45,6 @@ func (t *InputView) OnEvent(e event.Event) {
 		return
 	}
 }
+
+func (t *InputView) OnLoad() {
+}
