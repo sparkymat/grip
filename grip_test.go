@@ -46,12 +46,14 @@ func TestSanity(t *testing.T) {
 		Text:            "Name: Adam",
 		ForegroundColor: termbox.ColorWhite,
 		BackgroundColor: termbox.ColorCyan,
+		TextAlignment:   TextAlignmentCenter,
 	}, Area{0, 0, 0, 0})
 
 	sidebarGrid.AddView(&TextView{
 		Text:            "Class: Warlock",
 		ForegroundColor: termbox.ColorWhite,
 		BackgroundColor: termbox.ColorYellow,
+		TextAlignment:   TextAlignmentRight,
 	}, Area{0, 0, 1, 1})
 
 	progress := ProgressView{
