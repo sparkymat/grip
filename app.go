@@ -9,7 +9,7 @@ import (
 )
 
 type app struct {
-	rootNode       *grid
+	rootNode       *Grid
 	eventListeners map[event.Type][]event.EventHandler
 }
 
@@ -47,7 +47,7 @@ func (a *app) BroadcastEvent(eventType event.Type, data interface{}) error {
 	return nil
 }
 
-func (a *app) SetRootNode(node *grid) {
+func (a *app) SetRootNode(node *Grid) {
 	a.rootNode = node
 	a.rootNode.SetApp(a)
 	for _, eventType := range a.rootNode.RegisteredEvents() {

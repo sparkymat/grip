@@ -32,15 +32,15 @@ func TestSanity(t *testing.T) {
 		event.SystemTick,
 	)
 
-	mainGrid := NewGrid(
-		[]size.Size{size.Auto, size.WithPercent(30)},
-		[]size.Size{size.Auto, size.WithPoints(1)},
-	)
+	mainGrid := Grid{
+		ColumnSizes: []size.Size{size.Auto, size.WithPercent(30)},
+		RowSizes:    []size.Size{size.Auto, size.WithPoints(1)},
+	}
 
-	sidebarGrid := NewGrid(
-		[]size.Size{size.Auto},
-		[]size.Size{size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.Auto},
-	)
+	sidebarGrid := Grid{
+		ColumnSizes: []size.Size{size.Auto},
+		RowSizes:    []size.Size{size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.Auto},
+	}
 
 	sidebarGrid.AddView(&TextView{
 		Text:            "Name: Adam",

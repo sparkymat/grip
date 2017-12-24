@@ -1,56 +1,37 @@
 package grip
 
 import (
-	termbox "github.com/nsf/termbox-go"
 	"github.com/sparkymat/grip/event"
 	"github.com/sparkymat/grip/size"
 )
 
-type grid struct {
+type Grid struct {
+	ColumnSizes  []size.Size
+	RowSizes     []size.Size
 	app          *app
-	columnSizes  []size.Size
-	rowSizes     []size.Size
+	cells        []cell
 	columnWidths []uint32
 	rowHeights   []uint32
-	cells        []cell
+	windowHeight uint32
+	windowWidth  uint32
 	windowX      uint32
 	windowY      uint32
-	windowWidth  uint32
-	windowHeight uint32
 }
 
-func NewGrid(columnSizes []size.Size, rowSizes []size.Size) grid {
-	width, height := termbox.Size()
-	columnWidths := distributeLength(uint32(width), columnSizes)
-	rowHeights := distributeLength(uint32(height), rowSizes)
-
-	return grid{
-		columnSizes:  columnSizes,
-		rowSizes:     rowSizes,
-		columnWidths: columnWidths,
-		rowHeights:   rowHeights,
-		cells:        []cell{},
-		windowX:      0,
-		windowY:      0,
-		windowWidth:  uint32(width),
-		windowHeight: uint32(height),
-	}
-}
-
-func (g *grid) RegisteredEvents() []event.Type {
+func (g *Grid) RegisteredEvents() []event.Type {
 	return []event.Type{}
 }
 
-func (g *grid) OnLoad() {
+func (g *Grid) OnLoad() {
 	for _, cell := range g.cells {
 		cell.view.OnLoad()
 	}
 }
 
-func (g *grid) OnEvent(e event.Event) {
+func (g *Grid) OnEvent(e event.Event) {
 }
 
-func (g *grid) SetApp(app *app) {
+func (g *Grid) SetApp(app *app) {
 	g.app = app
 
 	for _, cell := range g.cells {
@@ -61,13 +42,13 @@ func (g *grid) SetApp(app *app) {
 	}
 }
 
-func (g *grid) AddView(v View, a Area) {
+func (g *Grid) AddView(v View, a Area) {
 	g.cells = append(g.cells, cell{v, a})
 }
 
-func (g *grid) Resize(x, y, width, height uint32) {
-	g.columnWidths = distributeLength(uint32(width), g.columnSizes)
-	g.rowHeights = distributeLength(uint32(height), g.rowSizes)
+func (g *Grid) Resize(x, y, width, height uint32) {
+	g.columnWidths = distributeLength(uint32(width), g.ColumnSizes)
+	g.rowHeights = distributeLength(uint32(height), g.RowSizes)
 
 	for _, cell := range g.cells {
 		var xOffset uint32 = 0
@@ -125,7 +106,7 @@ func distributeLength(totalLength uint32, sizes []size.Size) []uint32 {
 	return distributedLengths
 }
 
-func (g grid) Draw() {
+func (g *Grid) Draw() {
 	for _, cell := range g.cells {
 		cell.view.Draw()
 	}

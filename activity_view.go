@@ -60,18 +60,18 @@ func (a *ActivityView) Draw() {
 }
 
 func (a *ActivityView) OnLoad() {
-	a.progessX = a.x
+	a.progessX = a.x + 1
 	a.speedX = 10
 
 	timer := time.NewTicker(time.Millisecond * 100)
 	go func() {
 		for _ = range timer.C {
 			a.progessX = uint32(int32(a.progessX) + int32(a.width)/a.speedX)
-			if a.progessX >= a.x+a.width {
-				a.progessX = a.x + a.width - 1
+			if a.progessX >= a.x+a.width-1 {
+				a.progessX = a.x + a.width - 2
 				a.speedX *= -1
-			} else if a.progessX <= a.x {
-				a.progessX = a.x
+			} else if a.progessX <= a.x+1 {
+				a.progessX = a.x + 1
 				a.speedX *= -1
 			}
 			a.Draw()
