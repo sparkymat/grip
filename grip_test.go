@@ -55,7 +55,7 @@ func TestSanity(t *testing.T) {
 	sidebarGrid.AddView(&ProgressView{
 		Type:            ProgressViewTypePercentage,
 		ForegroundColor: termbox.ColorWhite,
-		BackgroundColor: termbox.ColorCyan,
+		BackgroundColor: termbox.ColorMagenta,
 		MinimumValue:    0,
 		MaximumValue:    1000,
 		CurrentValue:    666,
