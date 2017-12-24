@@ -8,5 +8,5 @@ type View interface {
 	OnLoad()
 	RegisteredEvents() []event.Type
 	Resize(x, y, width, height uint32)
-	SetApp(app *app)
+	SetApp(app *App)
 }

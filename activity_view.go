@@ -9,7 +9,7 @@ import (
 )
 
 type ActivityView struct {
-	app             *app
+	app             *App
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	Text            string
@@ -21,7 +21,7 @@ type ActivityView struct {
 	speedX          int32
 }
 
-func (a *ActivityView) SetApp(app *app) {
+func (a *ActivityView) SetApp(app *App) {
 	a.app = app
 }
 

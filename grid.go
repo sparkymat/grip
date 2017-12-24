@@ -8,7 +8,7 @@ import (
 type Grid struct {
 	ColumnSizes  []size.Size
 	RowSizes     []size.Size
-	app          *app
+	app          *App
 	cells        []cell
 	columnWidths []uint32
 	rowHeights   []uint32
@@ -31,7 +31,7 @@ func (g *Grid) OnLoad() {
 func (g *Grid) OnEvent(e event.Event) {
 }
 
-func (g *Grid) SetApp(app *app) {
+func (g *Grid) SetApp(app *App) {
 	g.app = app
 
 	for _, cell := range g.cells {

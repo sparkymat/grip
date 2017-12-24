@@ -13,7 +13,7 @@ const ProgressViewTypePercentage ProgressViewType = 0
 const ProgressViewTypeFraction ProgressViewType = 1
 
 type ProgressView struct {
-	app             *app
+	app             *App
 	MinimumValue    int32
 	CurrentValue    int32
 	MaximumValue    int32
@@ -26,7 +26,7 @@ type ProgressView struct {
 	y               uint32
 }
 
-func (p *ProgressView) SetApp(app *app) {
+func (p *ProgressView) SetApp(app *App) {
 	p.app = app
 }
 

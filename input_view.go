@@ -11,7 +11,7 @@ type InputView struct {
 	TextView TextView
 }
 
-func (t *InputView) SetApp(app *app) {
+func (t *InputView) SetApp(app *App) {
 	t.TextView.SetApp(app)
 }
 

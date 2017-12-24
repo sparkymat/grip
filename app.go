@@ -8,25 +8,25 @@ import (
 	"github.com/sparkymat/grip/event"
 )
 
-type app struct {
+type App struct {
 	rootNode       *Grid
 	eventListeners map[event.Type][]event.EventHandler
 }
 
-func New() app {
+func New() App {
 	eventListeners := make(map[event.Type][]event.EventHandler)
-	return app{
+	return App{
 		eventListeners: eventListeners,
 	}
 }
 
-func (a *app) RegisterEvents(eventTypes ...event.Type) {
+func (a *App) RegisterEvents(eventTypes ...event.Type) {
 	for _, eventType := range eventTypes {
 		a.eventListeners[eventType] = []event.EventHandler{}
 	}
 }
 
-func (a *app) RegisterEventListener(eventType event.Type, handler event.EventHandler) {
+func (a *App) RegisterEventListener(eventType event.Type, handler event.EventHandler) {
 	if _, ok := a.eventListeners[eventType]; !ok {
 		panic("Unregistered event")
 	}
@@ -35,7 +35,7 @@ func (a *app) RegisterEventListener(eventType event.Type, handler event.EventHan
 	a.eventListeners[eventType] = listeners
 }
 
-func (a *app) BroadcastEvent(eventType event.Type, data interface{}) error {
+func (a *App) BroadcastEvent(eventType event.Type, data interface{}) error {
 	if _, ok := a.eventListeners[eventType]; !ok {
 		return errors.New("Unregistered event")
 	}
@@ -47,7 +47,7 @@ func (a *app) BroadcastEvent(eventType event.Type, data interface{}) error {
 	return nil
 }
 
-func (a *app) SetRootNode(node *Grid) {
+func (a *App) SetRootNode(node *Grid) {
 	a.rootNode = node
 	a.rootNode.SetApp(a)
 	for _, eventType := range a.rootNode.RegisteredEvents() {
@@ -55,7 +55,7 @@ func (a *app) SetRootNode(node *Grid) {
 	}
 }
 
-func (a app) Run() error {
+func (a App) Run() error {
 	err := termbox.Init()
 	if err != nil {
 		return err

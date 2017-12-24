@@ -6,7 +6,7 @@ import (
 )
 
 type TextView struct {
-	app             *app
+	app             *App
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	Text            string
@@ -17,7 +17,7 @@ type TextView struct {
 	y               uint32
 }
 
-func (t *TextView) SetApp(app *app) {
+func (t *TextView) SetApp(app *App) {
 	t.app = app
 }
 
