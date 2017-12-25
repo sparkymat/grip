@@ -1,6 +1,7 @@
 package grip
 
 import (
+	"image"
 	"os"
 	"testing"
 	"time"
@@ -85,10 +86,20 @@ func TestSanity(t *testing.T) {
 		BackgroundColor: termbox.ColorBlue,
 	}, Area{0, 0, 4, 4})
 
-	mainGrid.AddView(&TextView{
-		Text:            "MainArea",
-		ForegroundColor: termbox.ColorWhite,
-		BackgroundColor: termbox.ColorGreen,
+	f, err := os.Open("test.jpg")
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	img, _, err := image.Decode(f)
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	mainGrid.AddView(&ImageView{
+		Image:           img,
+		ForegroundColor: termbox.ColorDefault,
+		BackgroundColor: termbox.ColorDefault,
 	}, Area{0, 0, 0, 0})
 
 	mainGrid.AddView(&sidebarGrid, Area{1, 1, 0, 1})
