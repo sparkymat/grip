@@ -48,6 +48,7 @@ func (t *TableView) RegisteredEvents() []event.Type {
 }
 
 func (t *TableView) OnLoad() {
+	t.grid.OnLoad()
 }
 
 func (t *TableView) OnEvent(e event.Event) {

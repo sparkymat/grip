@@ -2,6 +2,7 @@ package grip
 
 import (
 	"image"
+	"math/rand"
 	"os"
 	"testing"
 	"time"
@@ -41,7 +42,7 @@ func TestSanity(t *testing.T) {
 	sidebarGrid := NewTableView(
 		[]size.Size{size.Auto},
 		[]size.Size{size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.Auto, size.Auto},
-		termbox.ColorGreen,
+		termbox.ColorBlue,
 		termbox.ColorDefault,
 	)
 
@@ -65,14 +66,18 @@ func TestSanity(t *testing.T) {
 		BackgroundColor: termbox.ColorMagenta,
 		MinimumValue:    0,
 		MaximumValue:    1000,
-		CurrentValue:    666,
+		CurrentValue:    0,
 	}
 
-	progressTimer := time.NewTimer(time.Second * 2)
+	progressTimer := time.NewTicker(time.Millisecond * 250)
 	go func() {
-		<-progressTimer.C
-		progress.CurrentValue += 200
-		progress.Draw()
+		for _ = range progressTimer.C {
+			progress.CurrentValue += (rand.Int31() % 200)
+			if progress.CurrentValue > 1000 {
+				progress.CurrentValue = 0
+			}
+			progress.Draw()
+		}
 	}()
 	sidebarGrid.AddView(&progress, Area{0, 0, 2, 2})
 
