@@ -4,11 +4,12 @@ A UI toolkit based on termbox. Most of the paradigms used here are inspired by C
 ### Currently Implemented
 
 * Event broadcast
+* ActivityView
 * Grid
-* TextView
 * ImageView
 * ProgressView
-* ActivityView
+* TableView (similar to Grid, but with borders)
+* TextView
 * InputView (incomplete)
 
 ### Example
@@ -41,10 +42,12 @@ A UI toolkit based on termbox. Most of the paradigms used here are inspired by C
 		RowSizes:    []size.Size{size.Auto, size.WithPoints(1)},
 	}
 
-	sidebarGrid := Grid{
-		ColumnSizes: []size.Size{size.Auto},
-		RowSizes:    []size.Size{size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.Auto},
-	}
+	sidebarGrid := NewTableView(
+		[]size.Size{size.Auto},
+		[]size.Size{size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.Auto, size.Auto},
+		termbox.ColorBlue,
+		termbox.ColorDefault,
+	)
 
 	sidebarGrid.AddView(&TextView{
 		Text:            "Name: Adam",
@@ -66,14 +69,18 @@ A UI toolkit based on termbox. Most of the paradigms used here are inspired by C
 		BackgroundColor: termbox.ColorMagenta,
 		MinimumValue:    0,
 		MaximumValue:    1000,
-		CurrentValue:    666,
+		CurrentValue:    0,
 	}
 
-	progressTimer := time.NewTimer(time.Second * 2)
+	progressTimer := time.NewTicker(time.Millisecond * 250)
 	go func() {
-		<-progressTimer.C
-		progress.CurrentValue += 200
-		progress.Draw()
+		for _ = range progressTimer.C {
+			progress.CurrentValue += (rand.Int31() % 200)
+			if progress.CurrentValue > 1000 {
+				progress.CurrentValue = 0
+			}
+			progress.Draw()
+		}
 	}()
 	sidebarGrid.AddView(&progress, Area{0, 0, 2, 2})
 
@@ -88,6 +95,15 @@ A UI toolkit based on termbox. Most of the paradigms used here are inspired by C
 		ForegroundColor: termbox.ColorWhite,
 		BackgroundColor: termbox.ColorBlue,
 	}, Area{0, 0, 4, 4})
+
+	sampleTable := NewTableView(
+		[]size.Size{size.Auto, size.Auto, size.Auto},
+		[]size.Size{size.Auto, size.Auto, size.Auto},
+		termbox.ColorDefault,
+		termbox.ColorDefault,
+	)
+
+	sidebarGrid.AddView(&sampleTable, Area{0, 0, 5, 5})
 
 	f, err := os.Open("test.jpg")
 	if err != nil {
@@ -121,6 +137,8 @@ A UI toolkit based on termbox. Most of the paradigms used here are inspired by C
 	app.RegisterEventListener(event.SystemKeyPress, v)
 
 	app.Run()
+
+  // App logic
 ```
 
 produces the following
