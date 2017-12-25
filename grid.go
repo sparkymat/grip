@@ -12,10 +12,10 @@ type Grid struct {
 	cells        []cell
 	columnWidths []uint32
 	rowHeights   []uint32
-	windowHeight uint32
-	windowWidth  uint32
-	windowX      uint32
-	windowY      uint32
+	x            uint32
+	y            uint32
+	width        uint32
+	height       uint32
 }
 
 func (g *Grid) RegisteredEvents() []event.Type {
@@ -47,6 +47,11 @@ func (g *Grid) AddView(v View, a Area) {
 }
 
 func (g *Grid) Resize(x, y, width, height uint32) {
+	g.x = x
+	g.y = y
+	g.width = width
+	g.height = height
+
 	g.columnWidths = distributeLength(uint32(width), g.ColumnSizes)
 	g.rowHeights = distributeLength(uint32(height), g.RowSizes)
 
@@ -96,10 +101,17 @@ func distributeLength(totalLength uint32, sizes []size.Size) []uint32 {
 	remainingLength := totalLength - usedLength
 
 	if usedLength < totalLength {
+		var totalFractionalLength uint32 = 0
+		var lastFractionIndex int = -1
 		for lengthIndex, lengthSize := range sizes {
 			if lengthSize.Unit == size.Fraction {
+				lastFractionIndex = lengthIndex
 				distributedLengths[lengthIndex] = (remainingLength * lengthSize.Value) / totalFractions
+				totalFractionalLength += (remainingLength * lengthSize.Value) / totalFractions
 			}
+		}
+		if usedLength+totalFractionalLength < totalLength && lastFractionIndex != -1 {
+			distributedLengths[lastFractionIndex] += (totalLength - (usedLength + totalFractionalLength))
 		}
 	}
 

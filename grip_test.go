@@ -38,10 +38,12 @@ func TestSanity(t *testing.T) {
 		RowSizes:    []size.Size{size.Auto, size.WithPoints(1)},
 	}
 
-	sidebarGrid := Grid{
-		ColumnSizes: []size.Size{size.Auto},
-		RowSizes:    []size.Size{size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.Auto},
-	}
+	sidebarGrid := NewTableView(
+		[]size.Size{size.Auto},
+		[]size.Size{size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.Auto, size.Auto},
+		termbox.ColorGreen,
+		termbox.ColorDefault,
+	)
 
 	sidebarGrid.AddView(&TextView{
 		Text:            "Name: Adam",
@@ -85,6 +87,15 @@ func TestSanity(t *testing.T) {
 		ForegroundColor: termbox.ColorWhite,
 		BackgroundColor: termbox.ColorBlue,
 	}, Area{0, 0, 4, 4})
+
+	sampleTable := NewTableView(
+		[]size.Size{size.Auto, size.Auto, size.Auto},
+		[]size.Size{size.Auto, size.Auto, size.Auto},
+		termbox.ColorDefault,
+		termbox.ColorDefault,
+	)
+
+	sidebarGrid.AddView(&sampleTable, Area{0, 0, 5, 5})
 
 	f, err := os.Open("test.jpg")
 	if err != nil {

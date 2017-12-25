@@ -40,7 +40,10 @@ func (i *ImageView) Resize(x, y, width, height uint32) {
 func (v *ImageView) Draw() {
 	for j := v.y; j <= (v.y + v.height - 1); j++ {
 		for i := v.x + 1; i < (v.x + v.width - 1); i++ {
-			r := rune(v.scaleAscii[j*v.width+i])
+			var r rune = ' '
+			if j*v.width+i < uint32(len(v.scaleAscii)) {
+				r = rune(v.scaleAscii[j*v.width+i])
+			}
 			termbox.SetCell(int(i), int(j), r, v.ForegroundColor, v.BackgroundColor)
 		}
 	}
