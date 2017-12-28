@@ -9,26 +9,13 @@ import (
 )
 
 type App struct {
-	rootNode       *Grid
+	container      *Grid
 	eventListeners map[event.Type][]event.EventHandler
-}
-
-func New() App {
-	eventListeners := make(map[event.Type][]event.EventHandler)
-	return App{
-		eventListeners: eventListeners,
-	}
-}
-
-func (a *App) RegisterEvents(eventTypes ...event.Type) {
-	for _, eventType := range eventTypes {
-		a.eventListeners[eventType] = []event.EventHandler{}
-	}
 }
 
 func (a *App) RegisterEventListener(eventType event.Type, handler event.EventHandler) {
 	if _, ok := a.eventListeners[eventType]; !ok {
-		panic("Unregistered event")
+		a.eventListeners[eventType] = []event.EventHandler{}
 	}
 
 	listeners := append(a.eventListeners[eventType], handler)
@@ -47,12 +34,10 @@ func (a *App) BroadcastEvent(eventType event.Type, data interface{}) error {
 	return nil
 }
 
-func (a *App) SetRootNode(node *Grid) {
-	a.rootNode = node
-	a.rootNode.SetApp(a)
-	for _, eventType := range a.rootNode.RegisteredEvents() {
-		a.RegisterEventListener(eventType, a.rootNode)
-	}
+func (a *App) SetContainer(container *Grid) {
+	a.eventListeners = make(map[event.Type][]event.EventHandler)
+	a.container = container
+	a.container.Initialize(a.RegisterEventListener, a.BroadcastEvent)
 }
 
 func (a App) Run() error {
@@ -68,9 +53,9 @@ func (a App) Run() error {
 	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	width, height := termbox.Size()
-	a.rootNode.Resize(0, 0, uint32(width), uint32(height))
-	a.rootNode.OnLoad()
-	a.rootNode.Draw()
+	a.container.Resize(0, 0, uint32(width), uint32(height))
+	a.container.OnLoad()
+	a.container.Draw()
 	termbox.Flush()
 
 	// FIXME: FLush every 16 ms ?
@@ -87,8 +72,8 @@ func (a App) Run() error {
 		case termbox.EventResize:
 			termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 			width, height := termbox.Size()
-			a.rootNode.Resize(0, 0, uint32(width), uint32(height))
-			a.rootNode.Draw()
+			a.container.Resize(0, 0, uint32(width), uint32(height))
+			a.container.Draw()
 			termbox.Flush()
 			break
 		case termbox.EventKey:
@@ -102,4 +87,7 @@ func (a App) Run() error {
 	refreshTicker.Stop()
 
 	return err
+}
+
+func (a *App) Alert(message string, onDismiss func()) {
 }

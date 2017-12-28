@@ -20,12 +20,7 @@ type ImageView struct {
 	y               uint32
 }
 
-func (i *ImageView) SetApp(app *App) {
-	i.app = app
-}
-
-func (i *ImageView) RegisteredEvents() []event.Type {
-	return []event.Type{}
+func (i *ImageView) Initialize(register func(eventType event.Type, handler event.EventHandler), emit func(eventType event.Type, data interface{}) error) {
 }
 
 func (i *ImageView) Resize(x, y, width, height uint32) {

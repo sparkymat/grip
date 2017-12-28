@@ -24,12 +24,7 @@ type TextView struct {
 	y               uint32
 }
 
-func (t *TextView) SetApp(app *App) {
-	t.app = app
-}
-
-func (t *TextView) RegisteredEvents() []event.Type {
-	return []event.Type{}
+func (t *TextView) Initialize(register func(eventType event.Type, handler event.EventHandler), emit func(eventType event.Type, data interface{}) error) {
 }
 
 func (t *TextView) Resize(x, y, width, height uint32) {

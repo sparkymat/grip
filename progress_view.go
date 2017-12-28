@@ -26,12 +26,7 @@ type ProgressView struct {
 	y               uint32
 }
 
-func (p *ProgressView) SetApp(app *App) {
-	p.app = app
-}
-
-func (p *ProgressView) RegisteredEvents() []event.Type {
-	return []event.Type{}
+func (p *ProgressView) Initialize(register func(eventType event.Type, handler event.EventHandler), emit func(eventType event.Type, data interface{}) error) {
 }
 
 func (p *ProgressView) Resize(x, y, width, height uint32) {

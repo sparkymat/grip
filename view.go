@@ -3,10 +3,9 @@ package grip
 import "github.com/sparkymat/grip/event"
 
 type View interface {
-	Draw()
+	Initialize(registerEvent func(eventType event.Type, handler event.EventHandler), emitEvent func(eventType event.Type, data interface{}) error)
 	OnEvent(e event.Event)
 	OnLoad()
-	RegisteredEvents() []event.Type
 	Resize(x, y, width, height uint32)
-	SetApp(app *App)
+	Draw()
 }

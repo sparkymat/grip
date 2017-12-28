@@ -18,10 +18,6 @@ type Grid struct {
 	height       uint32
 }
 
-func (g *Grid) RegisteredEvents() []event.Type {
-	return []event.Type{}
-}
-
 func (g *Grid) OnLoad() {
 	for _, cell := range g.cells {
 		cell.view.OnLoad()
@@ -31,14 +27,9 @@ func (g *Grid) OnLoad() {
 func (g *Grid) OnEvent(e event.Event) {
 }
 
-func (g *Grid) SetApp(app *App) {
-	g.app = app
-
+func (g *Grid) Initialize(register func(eventType event.Type, handler event.EventHandler), emit func(eventType event.Type, data interface{}) error) {
 	for _, cell := range g.cells {
-		cell.view.SetApp(app)
-		for _, eventType := range cell.view.RegisteredEvents() {
-			app.RegisterEventListener(eventType, cell.view)
-		}
+		cell.view.Initialize(register, emit)
 	}
 }
 

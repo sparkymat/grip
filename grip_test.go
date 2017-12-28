@@ -27,12 +27,7 @@ func (t TestEventHandler) OnEvent(e event.Event) {
 }
 
 func TestSanity(t *testing.T) {
-	app := New()
-
-	app.RegisterEvents(
-		event.SystemKeyPress,
-		event.SystemTick,
-	)
+	app := App{}
 
 	mainGrid := Grid{
 		ColumnSizes: []size.Size{size.Auto, size.WithPercent(30)},
@@ -128,7 +123,7 @@ func TestSanity(t *testing.T) {
 		},
 	}, Area{0, 0, 1, 1})
 
-	app.SetRootNode(&mainGrid)
+	app.SetContainer(&mainGrid)
 
 	v := TestEventHandler{}
 	app.RegisterEventListener(event.SystemKeyPress, v)

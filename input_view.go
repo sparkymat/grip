@@ -11,14 +11,10 @@ type InputView struct {
 	TextView TextView
 }
 
-func (t *InputView) SetApp(app *App) {
-	t.TextView.SetApp(app)
-}
+func (t *InputView) Initialize(register func(eventType event.Type, handler event.EventHandler), emit func(eventType event.Type, data interface{}) error) {
+	register(event.SystemKeyPress, t)
 
-func (t *InputView) RegisteredEvents() []event.Type {
-	return []event.Type{
-		event.SystemKeyPress,
-	}
+	t.TextView.Initialize(register, emit)
 }
 
 func (t *InputView) Resize(x, y, width, height uint32) {
