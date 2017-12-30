@@ -17,7 +17,7 @@ func (t *InputView) Initialize(emit func(eventType event.Type, data interface{})
 	t.TextView.Initialize(emit)
 }
 
-func (t *InputView) Resize(x, y, width, height uint32) {
+func (t *InputView) Resize(x, y, width, height int) {
 	t.TextView.Resize(x, y, width, height)
 }
 

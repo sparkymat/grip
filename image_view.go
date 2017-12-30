@@ -14,17 +14,17 @@ type ImageView struct {
 	ForegroundColor termbox.Attribute
 	Image           image.Image
 	scaleAscii      []byte
-	height          uint32
-	width           uint32
-	x               uint32
-	y               uint32
+	height          int
+	width           int
+	x               int
+	y               int
 }
 
 func (i *ImageView) Initialize(emit func(eventType event.Type, data interface{})) {
 	i.emitEvent = emit
 }
 
-func (i *ImageView) Resize(x, y, width, height uint32) {
+func (i *ImageView) Resize(x, y, width, height int) {
 	i.x = x
 	i.y = y
 	i.width = width
@@ -37,10 +37,10 @@ func (v *ImageView) Draw() {
 	for j := v.y; j <= (v.y + v.height - 1); j++ {
 		for i := v.x + 1; i < (v.x + v.width - 1); i++ {
 			var r rune = ' '
-			if j*v.width+i < uint32(len(v.scaleAscii)) {
+			if j*v.width+i < len(v.scaleAscii) {
 				r = rune(v.scaleAscii[j*v.width+i])
 			}
-			termbox.SetCell(int(i), int(j), r, v.ForegroundColor, v.BackgroundColor)
+			termbox.SetCell(i, j, r, v.ForegroundColor, v.BackgroundColor)
 		}
 	}
 }

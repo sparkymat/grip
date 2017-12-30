@@ -46,7 +46,7 @@ func (m *modal) Draw() {
 	m.grid.Draw()
 }
 
-func (m *modal) Resize(x, y, width, height uint32) {
+func (m *modal) Resize(x, y, width, height int) {
 	m.grid.Resize(x, y, width, height)
 }
 

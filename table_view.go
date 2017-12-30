@@ -48,13 +48,13 @@ func (t *TableView) Initialize(emit func(eventType event.Type, data interface{})
 func (t *TableView) OnEvent(app *App, e event.Event) {
 }
 
-func (t *TableView) Resize(x, y, width, height uint32) {
+func (t *TableView) Resize(x, y, width, height int) {
 	t.grid.Resize(x, y, width, height)
 }
 
 func (t *TableView) Draw() {
-	junctionXs := []uint32{}
-	junctionYs := []uint32{}
+	junctionXs := []int{}
+	junctionYs := []int{}
 
 	// Vertical
 	i := t.grid.x
@@ -62,7 +62,7 @@ func (t *TableView) Draw() {
 		if idx%2 == 0 {
 			junctionXs = append(junctionXs, i)
 			for j := t.grid.y; j < t.grid.y+t.grid.height; j++ {
-				termbox.SetCell(int(i), int(j), '│', t.foregroundColor, t.backgroundColor)
+				termbox.SetCell(i, j, '│', t.foregroundColor, t.backgroundColor)
 			}
 		}
 
@@ -75,7 +75,7 @@ func (t *TableView) Draw() {
 		if idx%2 == 0 {
 			junctionYs = append(junctionYs, j)
 			for i := t.grid.x; i < t.grid.x+t.grid.width; i++ {
-				termbox.SetCell(int(i), int(j), '─', t.foregroundColor, t.backgroundColor)
+				termbox.SetCell(i, j, '─', t.foregroundColor, t.backgroundColor)
 			}
 		}
 
@@ -85,23 +85,23 @@ func (t *TableView) Draw() {
 	for _, i := range junctionXs {
 		for _, j := range junctionYs {
 			if i == t.grid.x && j == t.grid.y {
-				termbox.SetCell(int(i), int(j), '┌', t.foregroundColor, t.backgroundColor)
+				termbox.SetCell(i, j, '┌', t.foregroundColor, t.backgroundColor)
 			} else if i == t.grid.x && j == t.grid.y+t.grid.height-1 {
-				termbox.SetCell(int(i), int(j), '└', t.foregroundColor, t.backgroundColor)
+				termbox.SetCell(i, j, '└', t.foregroundColor, t.backgroundColor)
 			} else if i == t.grid.x+t.grid.width-1 && j == t.grid.y {
-				termbox.SetCell(int(i), int(j), '┐', t.foregroundColor, t.backgroundColor)
+				termbox.SetCell(i, j, '┐', t.foregroundColor, t.backgroundColor)
 			} else if i == t.grid.x+t.grid.width-1 && j == t.grid.y+t.grid.height-1 {
-				termbox.SetCell(int(i), int(j), '┘', t.foregroundColor, t.backgroundColor)
+				termbox.SetCell(i, j, '┘', t.foregroundColor, t.backgroundColor)
 			} else if i == t.grid.x {
-				termbox.SetCell(int(i), int(j), '├', t.foregroundColor, t.backgroundColor)
+				termbox.SetCell(i, j, '├', t.foregroundColor, t.backgroundColor)
 			} else if i == t.grid.x+t.grid.width-1 {
-				termbox.SetCell(int(i), int(j), '┤', t.foregroundColor, t.backgroundColor)
+				termbox.SetCell(i, j, '┤', t.foregroundColor, t.backgroundColor)
 			} else if j == t.grid.y {
-				termbox.SetCell(int(i), int(j), '┬', t.foregroundColor, t.backgroundColor)
+				termbox.SetCell(i, j, '┬', t.foregroundColor, t.backgroundColor)
 			} else if j == t.grid.y+t.grid.height-1 {
-				termbox.SetCell(int(i), int(j), '┴', t.foregroundColor, t.backgroundColor)
+				termbox.SetCell(i, j, '┴', t.foregroundColor, t.backgroundColor)
 			} else {
-				termbox.SetCell(int(i), int(j), '┼', t.foregroundColor, t.backgroundColor)
+				termbox.SetCell(i, j, '┼', t.foregroundColor, t.backgroundColor)
 			}
 		}
 	}

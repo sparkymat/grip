@@ -105,11 +105,11 @@ func (a App) Run() error {
 			termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 			width, height := termbox.Size()
 
-			a.container.Resize(0, 0, uint32(width), uint32(height))
+			a.container.Resize(0, 0, width, height)
 			a.container.Draw()
 
 			if a.modalVisible && a.modalContainer != nil {
-				a.modalContainer.Resize(0, 0, uint32(width), uint32(height))
+				a.modalContainer.Resize(0, 0, width, height)
 				a.modalContainer.Draw()
 			}
 
@@ -138,12 +138,12 @@ func (a *App) Refresh() {
 	width, height := termbox.Size()
 
 	if a.container != nil {
-		a.container.Resize(0, 0, uint32(width), uint32(height))
+		a.container.Resize(0, 0, width, height)
 		a.container.Draw()
 	}
 
 	if a.modalVisible && a.modalContainer != nil {
-		a.modalContainer.Resize(0, 0, uint32(width), uint32(height))
+		a.modalContainer.Resize(0, 0, width, height)
 		a.modalContainer.Draw()
 	}
 }

@@ -11,18 +11,18 @@ const (
 var Auto = Size{Unit: Fraction, Value: 1}
 
 type Size struct {
-	Value uint32
+	Value int
 	Unit  unit
 }
 
-func WithFraction(value uint32) Size {
+func WithFraction(value int) Size {
 	return Size{Value: value, Unit: Fraction}
 }
 
-func WithPercent(value uint32) Size {
+func WithPercent(value int) Size {
 	return Size{Value: value, Unit: Percent}
 }
 
-func WithPoints(value uint32) Size {
+func WithPoints(value int) Size {
 	return Size{Value: value, Unit: Point}
 }

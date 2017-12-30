@@ -13,12 +13,12 @@ type ActivityView struct {
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	Text            string
-	height          uint32
-	width           uint32
-	x               uint32
-	y               uint32
-	progessX        uint32
-	speedX          int32
+	height          int
+	width           int
+	x               int
+	y               int
+	progessX        int
+	speedX          int
 }
 
 func (a *ActivityView) Initialize(emit func(eventType event.Type, data interface{})) {
@@ -30,7 +30,7 @@ func (a *ActivityView) Initialize(emit func(eventType event.Type, data interface
 	timer := time.NewTicker(time.Millisecond * 100)
 	go func() {
 		for _ = range timer.C {
-			a.progessX = uint32(int32(a.progessX) + int32(a.width)/a.speedX)
+			a.progessX += (a.width / a.speedX)
 			if a.progessX >= a.x+a.width-1 {
 				a.progessX = a.x + a.width - 2
 				a.speedX *= -1
@@ -43,7 +43,7 @@ func (a *ActivityView) Initialize(emit func(eventType event.Type, data interface
 	}()
 }
 
-func (a *ActivityView) Resize(x, y, width, height uint32) {
+func (a *ActivityView) Resize(x, y, width, height int) {
 	a.x = x
 	a.y = y
 	a.width = width
@@ -52,22 +52,22 @@ func (a *ActivityView) Resize(x, y, width, height uint32) {
 
 func (a *ActivityView) Draw() {
 	for j := a.y; j <= (a.y + a.height - 1); j++ {
-		termbox.SetCell(int(a.x), int(j), '[', a.ForegroundColor, a.BackgroundColor)
-		termbox.SetCell(int(a.x+a.width-1), int(j), ']', a.ForegroundColor, a.BackgroundColor)
+		termbox.SetCell(a.x, j, '[', a.ForegroundColor, a.BackgroundColor)
+		termbox.SetCell(a.x+a.width-1, j, ']', a.ForegroundColor, a.BackgroundColor)
 
 		for i := a.x + 1; i < (a.x + a.width - 1); i++ {
-			termbox.SetCell(int(i), int(j), ' ', a.ForegroundColor, a.BackgroundColor)
+			termbox.SetCell(i, j, ' ', a.ForegroundColor, a.BackgroundColor)
 		}
 		if a.progessX >= a.x && a.progessX <= a.x+a.width-1 {
-			termbox.SetCell(int(a.progessX), int(j), '=', a.ForegroundColor, a.BackgroundColor)
+			termbox.SetCell(a.progessX, j, '=', a.ForegroundColor, a.BackgroundColor)
 		}
 
 		if len(a.Text) > 0 {
 			displayText := fmt.Sprintf(" %v ", a.Text)
-			textX := a.x + (a.width-uint32(len(displayText)))/2
-			for i := textX; i < textX+uint32(len(displayText)); i++ {
+			textX := a.x + (a.width-len(displayText))/2
+			for i := textX; i < textX+len(displayText); i++ {
 				char := rune(displayText[i-textX])
-				termbox.SetCell(int(i), int(j), char, a.ForegroundColor, a.BackgroundColor)
+				termbox.SetCell(i, j, char, a.ForegroundColor, a.BackgroundColor)
 			}
 		}
 	}

@@ -69,7 +69,7 @@ func TestSanity(t *testing.T) {
 	progressTimer := time.NewTicker(time.Millisecond * 250)
 	go func() {
 		for _ = range progressTimer.C {
-			progress.CurrentValue += (rand.Int31() % 200)
+			progress.CurrentValue += (rand.Int() % 200)
 			if progress.CurrentValue > 1000 {
 				progress.CurrentValue = 0
 			}

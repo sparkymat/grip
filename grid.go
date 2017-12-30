@@ -14,12 +14,12 @@ type Grid struct {
 	RowSizes        []size.Size
 	app             *App
 	cells           []cell
-	columnWidths    []uint32
-	rowHeights      []uint32
-	x               uint32
-	y               uint32
-	width           uint32
-	height          uint32
+	columnWidths    []int
+	rowHeights      []int
+	x               int
+	y               int
+	width           int
+	height          int
 }
 
 func (g *Grid) OnEvent(app *App, e event.Event) {
@@ -39,21 +39,21 @@ func (g *Grid) AddView(v View, a Area) {
 	g.cells = append(g.cells, cell{v, a})
 }
 
-func (g *Grid) Resize(x, y, width, height uint32) {
+func (g *Grid) Resize(x, y, width, height int) {
 	g.x = x
 	g.y = y
 	g.width = width
 	g.height = height
 
-	g.columnWidths = distributeLength(uint32(width), g.ColumnSizes)
-	g.rowHeights = distributeLength(uint32(height), g.RowSizes)
+	g.columnWidths = distributeLength(width, g.ColumnSizes)
+	g.rowHeights = distributeLength(height, g.RowSizes)
 
 	for _, cell := range g.cells {
-		var xOffset uint32 = 0
-		var yOffset uint32 = 0
-		var viewWidth uint32 = 0
-		var viewHeight uint32 = 0
-		var i uint32
+		var xOffset int = 0
+		var yOffset int = 0
+		var viewWidth int = 0
+		var viewHeight int = 0
+		var i int
 
 		for i = 0; i < cell.area.ColumnStart; i++ {
 			xOffset += g.columnWidths[i]
@@ -75,10 +75,10 @@ func (g *Grid) Resize(x, y, width, height uint32) {
 	}
 }
 
-func distributeLength(totalLength uint32, sizes []size.Size) []uint32 {
-	var distributedLengths = make([]uint32, len(sizes))
-	var totalFractions uint32 = 0
-	var usedLength uint32 = 0
+func distributeLength(totalLength int, sizes []size.Size) []int {
+	var distributedLengths = make([]int, len(sizes))
+	var totalFractions int = 0
+	var usedLength int = 0
 
 	for lengthIndex, lengthSize := range sizes {
 		if lengthSize.Unit == size.Fraction {
@@ -94,7 +94,7 @@ func distributeLength(totalLength uint32, sizes []size.Size) []uint32 {
 	remainingLength := totalLength - usedLength
 
 	if usedLength < totalLength {
-		var totalFractionalLength uint32 = 0
+		var totalFractionalLength int = 0
 		var lastFractionIndex int = -1
 		for lengthIndex, lengthSize := range sizes {
 			if lengthSize.Unit == size.Fraction {
@@ -115,7 +115,7 @@ func (g *Grid) Draw() {
 	if g.HasBackground {
 		for j := g.y; j < g.y+g.height; j++ {
 			for i := g.x; i < g.x+g.width; i++ {
-				termbox.SetCell(int(i), int(j), ' ', g.BackgroundColor, g.BackgroundColor)
+				termbox.SetCell(i, j, ' ', g.BackgroundColor, g.BackgroundColor)
 			}
 		}
 	}

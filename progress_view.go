@@ -14,23 +14,23 @@ const ProgressViewTypeFraction ProgressViewType = 1
 
 type ProgressView struct {
 	emitEvent       func(event.Type, interface{})
-	MinimumValue    int32
-	CurrentValue    int32
-	MaximumValue    int32
+	MinimumValue    int
+	CurrentValue    int
+	MaximumValue    int
 	Type            ProgressViewType
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
-	height          uint32
-	width           uint32
-	x               uint32
-	y               uint32
+	height          int
+	width           int
+	x               int
+	y               int
 }
 
 func (p *ProgressView) Initialize(emit func(eventType event.Type, data interface{})) {
 	p.emitEvent = emit
 }
 
-func (p *ProgressView) Resize(x, y, width, height uint32) {
+func (p *ProgressView) Resize(x, y, width, height int) {
 	p.x = x
 	p.y = y
 	p.width = width
@@ -50,9 +50,9 @@ func (p *ProgressView) Draw() {
 			fractionComplete = float32(p.CurrentValue) / float32(p.MaximumValue-p.MinimumValue)
 			minX := p.x + 1
 			maxX := p.x + p.width - 2
-			currentMaxX := minX + uint32(float32(maxX-minX)*fractionComplete)
+			currentMaxX := minX + int(float32(maxX-minX)*fractionComplete)
 			for i := minX; i <= currentMaxX; i++ {
-				termbox.SetCell(int(i), int(j), '=', p.ForegroundColor, p.BackgroundColor)
+				termbox.SetCell(i, j, '=', p.ForegroundColor, p.BackgroundColor)
 			}
 		}
 
@@ -66,10 +66,10 @@ func (p *ProgressView) Draw() {
 			displayText = fmt.Sprintf(" %.1f%% ", fractionComplete*100)
 			break
 		}
-		textX := p.x + (p.width-uint32(len(displayText)))/2
-		for i := textX; i < textX+uint32(len(displayText)); i++ {
+		textX := p.x + (p.width-len(displayText))/2
+		for i := textX; i < textX+len(displayText); i++ {
 			char := rune(displayText[i-textX])
-			termbox.SetCell(int(i), int(j), char, p.ForegroundColor, p.BackgroundColor)
+			termbox.SetCell(i, j, char, p.ForegroundColor, p.BackgroundColor)
 		}
 	}
 }
