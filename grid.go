@@ -29,6 +29,9 @@ func (g *Grid) OnLoad() {
 }
 
 func (g *Grid) OnEvent(app *App, e event.Event) {
+	for _, cell := range g.cells {
+		cell.view.OnEvent(app, e)
+	}
 }
 
 func (g *Grid) Initialize(emit func(eventType event.Type, data interface{})) {

@@ -45,6 +45,7 @@ func (a *App) Alert(message string, onDismiss func()) {
 		func(app *App, ev event.Event) {
 			if ev.Type == event.SystemKeyPress {
 				app.HideModal()
+				onDismiss()
 			}
 		},
 	)

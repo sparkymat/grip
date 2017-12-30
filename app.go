@@ -9,9 +9,7 @@ import (
 	"github.com/sparkymat/grip/size"
 )
 
-type EventHandler interface {
-	OnEvent(app *App, e event.Event)
-}
+type EventHandler func(*App, event.Event)
 
 type App struct {
 	container            View
@@ -38,8 +36,8 @@ func (a *App) EmitGlobalEvent(eventType event.Type, data interface{}) error {
 		return errors.New("Unregistered event")
 	}
 
-	for _, registeredView := range a.globalEventListeners[eventType] {
-		go registeredView.OnEvent(a, event.Event{eventType, data})
+	for _, registeredHandler := range a.globalEventListeners[eventType] {
+		go registeredHandler(a, event.Event{eventType, data})
 	}
 
 	return nil
