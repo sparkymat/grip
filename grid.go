@@ -1,21 +1,24 @@
 package grip
 
 import (
+	termbox "github.com/nsf/termbox-go"
 	"github.com/sparkymat/grip/event"
 	"github.com/sparkymat/grip/size"
 )
 
 type Grid struct {
-	ColumnSizes  []size.Size
-	RowSizes     []size.Size
-	app          *App
-	cells        []cell
-	columnWidths []uint32
-	rowHeights   []uint32
-	x            uint32
-	y            uint32
-	width        uint32
-	height       uint32
+	HasBackground   bool
+	BackgroundColor termbox.Attribute
+	ColumnSizes     []size.Size
+	RowSizes        []size.Size
+	app             *App
+	cells           []cell
+	columnWidths    []uint32
+	rowHeights      []uint32
+	x               uint32
+	y               uint32
+	width           uint32
+	height          uint32
 }
 
 func (g *Grid) OnLoad() {
@@ -110,6 +113,14 @@ func distributeLength(totalLength uint32, sizes []size.Size) []uint32 {
 }
 
 func (g *Grid) Draw() {
+	if g.HasBackground {
+		for j := g.y; j < g.y+g.height; j++ {
+			for i := g.x; i < g.x+g.width; i++ {
+				termbox.SetCell(int(i), int(j), ' ', g.BackgroundColor, g.BackgroundColor)
+			}
+		}
+	}
+
 	for _, cell := range g.cells {
 		cell.view.Draw()
 	}

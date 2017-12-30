@@ -12,7 +12,9 @@ import (
 	"github.com/sparkymat/grip/size"
 )
 
-type TestEventHandler struct{}
+type TestEventHandler struct {
+	App *App
+}
 
 func (t TestEventHandler) OnEvent(e event.Event) {
 	switch e.Type {
@@ -21,6 +23,8 @@ func (t TestEventHandler) OnEvent(e event.Event) {
 		if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyEsc {
 			termbox.Close()
 			os.Exit(0)
+		} else if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyF1 {
+			t.App.Alert("Hello", func() {})
 		}
 		break
 	}
@@ -125,8 +129,8 @@ func TestSanity(t *testing.T) {
 
 	app.SetContainer(&mainGrid)
 
-	v := TestEventHandler{}
-	app.RegisterEventListener(event.SystemKeyPress, v)
+	v := TestEventHandler{App: &app}
+	app.RegisterGlobalEventListener(event.SystemKeyPress, v)
 
 	app.Run()
 }
