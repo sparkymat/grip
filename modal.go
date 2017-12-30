@@ -13,10 +13,10 @@ type modal struct {
 	title   View
 	body    View
 	footer  View
-	onEvent func(event.Event)
+	onEvent func(*App, event.Event)
 }
 
-func NewModal(app *App, width uint32, height uint32, title View, body View, footer View, onEvent func(event.Event)) modal {
+func NewModal(app *App, width uint32, height uint32, title View, body View, footer View, onEvent func(*App, event.Event)) modal {
 	modalGrid := Grid{
 		ColumnSizes: []size.Size{size.Auto},
 		RowSizes:    []size.Size{size.WithPoints(1), size.Auto, size.WithPoints(3)},
@@ -54,5 +54,7 @@ func (m *modal) OnLoad() {
 }
 
 func (m *modal) OnEvent(app *App, ev event.Event) {
-	m.onEvent(ev)
+	if m.onEvent != nil {
+		m.onEvent(app, ev)
+	}
 }

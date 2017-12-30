@@ -42,9 +42,9 @@ func (a *App) Alert(message string, onDismiss func()) {
 		&TextView{Text: "Alert", ForegroundColor: termbox.ColorBlack, BackgroundColor: termbox.ColorWhite, TextAlignment: TextAlignmentCenter},
 		&body,
 		&footer,
-		func(ev event.Event) {
+		func(app *App, ev event.Event) {
 			if ev.Type == event.SystemKeyPress {
-				a.HideModal()
+				app.HideModal()
 			}
 		},
 	)

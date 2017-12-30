@@ -154,7 +154,7 @@ func (a App) Run() error {
 			a.container.Resize(0, 0, uint32(width), uint32(height))
 			a.container.Draw()
 
-			if a.modalVisible {
+			if a.modalVisible && a.modalContainer != nil {
 				a.modalContainer.Resize(0, 0, uint32(width), uint32(height))
 				a.modalContainer.Draw()
 			}
