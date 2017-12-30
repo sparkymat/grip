@@ -116,11 +116,11 @@ func (a App) Run() error {
 			termbox.Flush()
 			break
 		case termbox.EventKey:
-			a.EmitGlobalEvent(event.SystemKeyPress, ev)
 
 			if a.modalVisible {
 				a.EmitModalEvent(event.SystemKeyPress, ev)
 			} else {
+				a.EmitGlobalEvent(event.SystemKeyPress, ev)
 				a.EmitEvent(event.SystemKeyPress, ev)
 			}
 			break
