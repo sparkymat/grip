@@ -14,9 +14,9 @@ type EventHandler interface {
 }
 
 type App struct {
-	container            *Grid
+	container            View
 	globalEventListeners map[event.Type][]EventHandler
-	modalContainer       *Grid
+	modalContainer       View
 	modalVisible         bool
 }
 
