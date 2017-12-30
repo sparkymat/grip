@@ -9,7 +9,7 @@ import (
 )
 
 type ActivityView struct {
-	app             *App
+	emitEvent       func(event.Type, interface{})
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	Text            string
@@ -21,7 +21,8 @@ type ActivityView struct {
 	speedX          int32
 }
 
-func (a *ActivityView) Initialize(register func(eventType event.Type, handler EventHandler), emit func(eventType event.Type, data interface{}) error) {
+func (a *ActivityView) Initialize(emit func(eventType event.Type, data interface{})) {
+	a.emitEvent = emit
 }
 
 func (a *ActivityView) Resize(x, y, width, height uint32) {

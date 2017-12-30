@@ -9,7 +9,7 @@ import (
 )
 
 type ImageView struct {
-	app             *App
+	emitEvent       func(event.Type, interface{})
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	Image           image.Image
@@ -20,7 +20,8 @@ type ImageView struct {
 	y               uint32
 }
 
-func (i *ImageView) Initialize(register func(eventType event.Type, handler EventHandler), emit func(eventType event.Type, data interface{}) error) {
+func (i *ImageView) Initialize(emit func(eventType event.Type, data interface{})) {
+	i.emitEvent = emit
 }
 
 func (i *ImageView) Resize(x, y, width, height uint32) {

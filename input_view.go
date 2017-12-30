@@ -8,13 +8,13 @@ import (
 )
 
 type InputView struct {
-	TextView TextView
+	emitEvent func(event.Type, interface{})
+	TextView  TextView
 }
 
-func (t *InputView) Initialize(register func(eventType event.Type, handler EventHandler), emit func(eventType event.Type, data interface{}) error) {
-	register(event.SystemKeyPress, t)
-
-	t.TextView.Initialize(register, emit)
+func (t *InputView) Initialize(emit func(eventType event.Type, data interface{})) {
+	t.emitEvent = emit
+	t.TextView.Initialize(emit)
 }
 
 func (t *InputView) Resize(x, y, width, height uint32) {

@@ -6,14 +6,14 @@ import (
 )
 
 type modal struct {
-	app     *App
-	grid    Grid
-	width   uint32
-	height  uint32
-	title   View
-	body    View
-	footer  View
-	onEvent func(*App, event.Event)
+	emitEvent func(event.Type, interface{})
+	grid      Grid
+	width     uint32
+	height    uint32
+	title     View
+	body      View
+	footer    View
+	onEvent   func(*App, event.Event)
 }
 
 func NewModal(app *App, width uint32, height uint32, title View, body View, footer View, onEvent func(*App, event.Event)) modal {
@@ -27,7 +27,6 @@ func NewModal(app *App, width uint32, height uint32, title View, body View, foot
 	modalGrid.AddView(footer, Area{0, 0, 2, 2})
 
 	return modal{
-		app:     app,
 		width:   width,
 		height:  height,
 		grid:    modalGrid,
@@ -38,8 +37,9 @@ func NewModal(app *App, width uint32, height uint32, title View, body View, foot
 	}
 }
 
-func (m *modal) Initialize(register func(event.Type, EventHandler), emit func(event.Type, interface{}) error) {
-	m.grid.Initialize(register, emit)
+func (m *modal) Initialize(emit func(event.Type, interface{})) {
+	m.emitEvent = emit
+	m.grid.Initialize(emit)
 }
 
 func (m *modal) Draw() {

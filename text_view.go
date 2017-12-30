@@ -12,7 +12,7 @@ const TextAlignmentCenter TextAlignment = 1
 const TextAlignmentRight TextAlignment = 2
 
 type TextView struct {
-	app             *App
+	emitEvent       func(eventType event.Type, data interface{})
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	TextAlignment   TextAlignment
@@ -24,7 +24,8 @@ type TextView struct {
 	y               uint32
 }
 
-func (t *TextView) Initialize(register func(eventType event.Type, handler EventHandler), emit func(eventType event.Type, data interface{}) error) {
+func (t *TextView) Initialize(emit func(eventType event.Type, data interface{})) {
+	t.emitEvent = emit
 }
 
 func (t *TextView) Resize(x, y, width, height uint32) {

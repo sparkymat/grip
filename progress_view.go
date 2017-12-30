@@ -13,7 +13,7 @@ const ProgressViewTypePercentage ProgressViewType = 0
 const ProgressViewTypeFraction ProgressViewType = 1
 
 type ProgressView struct {
-	app             *App
+	emitEvent       func(event.Type, interface{})
 	MinimumValue    int32
 	CurrentValue    int32
 	MaximumValue    int32
@@ -26,7 +26,8 @@ type ProgressView struct {
 	y               uint32
 }
 
-func (p *ProgressView) Initialize(register func(eventType event.Type, handler EventHandler), emit func(eventType event.Type, data interface{}) error) {
+func (p *ProgressView) Initialize(emit func(eventType event.Type, data interface{})) {
+	p.emitEvent = emit
 }
 
 func (p *ProgressView) Resize(x, y, width, height uint32) {

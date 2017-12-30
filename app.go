@@ -15,29 +15,9 @@ type EventHandler interface {
 
 type App struct {
 	container            *Grid
-	eventListeners       map[event.Type][]EventHandler
 	globalEventListeners map[event.Type][]EventHandler
 	modalContainer       *Grid
-	modalEventListeners  map[event.Type][]EventHandler
 	modalVisible         bool
-}
-
-func (a *App) registerModalEventListener(eventType event.Type, handler EventHandler) {
-	if _, ok := a.modalEventListeners[eventType]; !ok {
-		a.modalEventListeners[eventType] = []EventHandler{}
-	}
-
-	listeners := append(a.modalEventListeners[eventType], handler)
-	a.modalEventListeners[eventType] = listeners
-}
-
-func (a *App) registerEventListener(eventType event.Type, handler EventHandler) {
-	if _, ok := a.eventListeners[eventType]; !ok {
-		a.eventListeners[eventType] = []EventHandler{}
-	}
-
-	listeners := append(a.eventListeners[eventType], handler)
-	a.eventListeners[eventType] = listeners
 }
 
 func (a *App) RegisterGlobalEventListener(eventType event.Type, handler EventHandler) {
@@ -65,34 +45,21 @@ func (a *App) EmitGlobalEvent(eventType event.Type, data interface{}) error {
 	return nil
 }
 
-func (a *App) EmitEvent(eventType event.Type, data interface{}) error {
-	if _, ok := a.eventListeners[eventType]; !ok {
-		return errors.New("Unregistered event")
+func (a *App) EmitEvent(eventType event.Type, data interface{}) {
+	if a.container != nil {
+		go a.container.OnEvent(a, event.Event{Type: eventType, Data: data})
 	}
-
-	for _, registeredView := range a.eventListeners[eventType] {
-		go registeredView.OnEvent(a, event.Event{eventType, data})
-	}
-
-	return nil
 }
 
-func (a *App) EmitModalEvent(eventType event.Type, data interface{}) error {
-	if _, ok := a.modalEventListeners[eventType]; !ok {
-		return errors.New("Unregistered event")
+func (a *App) EmitModalEvent(eventType event.Type, data interface{}) {
+	if a.modalContainer != nil {
+		go a.modalContainer.OnEvent(a, event.Event{Type: eventType, Data: data})
 	}
-
-	for _, registeredView := range a.modalEventListeners[eventType] {
-		go registeredView.OnEvent(a, event.Event{eventType, data})
-	}
-
-	return nil
 }
 
 func (a *App) SetContainer(container *Grid) {
-	a.eventListeners = make(map[event.Type][]EventHandler)
 	a.container = container
-	a.container.Initialize(a.registerEventListener, a.EmitEvent)
+	a.container.Initialize(a.EmitEvent)
 }
 
 func (a *App) SetModal(m *modal) {
@@ -103,9 +70,8 @@ func (a *App) SetModal(m *modal) {
 
 	modalGrid.AddView(m, Area{1, 1, 1, 1})
 
-	a.modalEventListeners = make(map[event.Type][]EventHandler)
 	a.modalContainer = &modalGrid
-	a.modalContainer.Initialize(a.registerModalEventListener, a.EmitModalEvent)
+	a.modalContainer.Initialize(a.EmitModalEvent)
 }
 
 func (a App) Run() error {
@@ -163,6 +129,7 @@ func (a App) Run() error {
 			break
 		case termbox.EventKey:
 			a.EmitGlobalEvent(event.SystemKeyPress, ev)
+
 			if a.modalVisible {
 				a.EmitModalEvent(event.SystemKeyPress, ev)
 			} else {

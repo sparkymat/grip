@@ -7,6 +7,7 @@ import (
 )
 
 type Grid struct {
+	emitEvent       func(event.Type, interface{})
 	HasBackground   bool
 	BackgroundColor termbox.Attribute
 	ColumnSizes     []size.Size
@@ -30,9 +31,10 @@ func (g *Grid) OnLoad() {
 func (g *Grid) OnEvent(app *App, e event.Event) {
 }
 
-func (g *Grid) Initialize(register func(eventType event.Type, handler EventHandler), emit func(eventType event.Type, data interface{}) error) {
+func (g *Grid) Initialize(emit func(eventType event.Type, data interface{})) {
+	g.emitEvent = emit
 	for _, cell := range g.cells {
-		cell.view.Initialize(register, emit)
+		cell.view.Initialize(emit)
 	}
 }
 
