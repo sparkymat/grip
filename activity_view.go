@@ -17,6 +17,10 @@ type ActivityView struct {
 	width           int
 	x               int
 	y               int
+	visibleHeight   int
+	visibleWidth    int
+	visibleX        int
+	visibleY        int
 	progessX        int
 	speedX          int
 }
@@ -43,11 +47,15 @@ func (a *ActivityView) Initialize(emit func(eventType event.Type, data interface
 	}()
 }
 
-func (a *ActivityView) Resize(x, y, width, height int) {
+func (a *ActivityView) Resize(x, y, width, height, visibleX, visibleY, visibleWidth, visibleHeight int) {
 	a.x = x
 	a.y = y
 	a.width = width
 	a.height = height
+	a.visibleX = visibleX
+	a.visibleY = visibleY
+	a.visibleWidth = visibleWidth
+	a.visibleHeight = visibleHeight
 }
 
 func (a *ActivityView) Draw() {

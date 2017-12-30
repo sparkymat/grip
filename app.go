@@ -85,7 +85,6 @@ func (a App) Run() error {
 	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
 	a.Refresh()
-
 	termbox.Flush()
 
 	// FIXME: FLush every 16 ms ?
@@ -103,16 +102,7 @@ func (a App) Run() error {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventResize:
 			termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-			width, height := termbox.Size()
-
-			a.container.Resize(0, 0, width, height)
-			a.container.Draw()
-
-			if a.modalVisible && a.modalContainer != nil {
-				a.modalContainer.Resize(0, 0, width, height)
-				a.modalContainer.Draw()
-			}
-
+			a.Refresh()
 			termbox.Flush()
 			break
 		case termbox.EventKey:
@@ -138,12 +128,12 @@ func (a *App) Refresh() {
 	width, height := termbox.Size()
 
 	if a.container != nil {
-		a.container.Resize(0, 0, width, height)
+		a.container.Resize(0, 0, width, height, 0, 0, width, height)
 		a.container.Draw()
 	}
 
 	if a.modalVisible && a.modalContainer != nil {
-		a.modalContainer.Resize(0, 0, width, height)
+		a.modalContainer.Resize(0, 0, width, height, 0, 0, width, height)
 		a.modalContainer.Draw()
 	}
 }

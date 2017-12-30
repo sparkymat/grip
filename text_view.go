@@ -22,17 +22,25 @@ type TextView struct {
 	width           int
 	x               int
 	y               int
+	visibleHeight   int
+	visibleWidth    int
+	visibleX        int
+	visibleY        int
 }
 
 func (t *TextView) Initialize(emit func(eventType event.Type, data interface{})) {
 	t.emitEvent = emit
 }
 
-func (t *TextView) Resize(x, y, width, height int) {
+func (t *TextView) Resize(x, y, width, height, visibleX, visibleY, visibleWidth, visibleHeight int) {
 	t.x = x
 	t.y = y
 	t.width = width
 	t.height = height
+	t.visibleX = visibleX
+	t.visibleY = visibleY
+	t.visibleWidth = visibleWidth
+	t.visibleHeight = visibleHeight
 }
 
 func (t *TextView) Draw() {

@@ -24,17 +24,25 @@ type ProgressView struct {
 	width           int
 	x               int
 	y               int
+	visibleHeight   int
+	visibleWidth    int
+	visibleX        int
+	visibleY        int
 }
 
 func (p *ProgressView) Initialize(emit func(eventType event.Type, data interface{})) {
 	p.emitEvent = emit
 }
 
-func (p *ProgressView) Resize(x, y, width, height int) {
+func (p *ProgressView) Resize(x, y, width, height, visibleX, visibleY, visibleWidth, visibleHeight int) {
 	p.x = x
 	p.y = y
 	p.width = width
 	p.height = height
+	p.visibleX = visibleX
+	p.visibleY = visibleY
+	p.visibleWidth = visibleWidth
+	p.visibleHeight = visibleHeight
 }
 
 func (p *ProgressView) Draw() {

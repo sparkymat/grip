@@ -48,8 +48,8 @@ func (t *TableView) Initialize(emit func(eventType event.Type, data interface{})
 func (t *TableView) OnEvent(app *App, e event.Event) {
 }
 
-func (t *TableView) Resize(x, y, width, height int) {
-	t.grid.Resize(x, y, width, height)
+func (t *TableView) Resize(x, y, width, height, visibleX, visibleY, visibleWidth, visibleHeight int) {
+	t.grid.Resize(x, y, width, height, visibleX, visibleY, visibleWidth, visibleHeight)
 }
 
 func (t *TableView) Draw() {

@@ -18,17 +18,25 @@ type ImageView struct {
 	width           int
 	x               int
 	y               int
+	visibleHeight   int
+	visibleWidth    int
+	visibleX        int
+	visibleY        int
 }
 
 func (i *ImageView) Initialize(emit func(eventType event.Type, data interface{})) {
 	i.emitEvent = emit
 }
 
-func (i *ImageView) Resize(x, y, width, height int) {
+func (i *ImageView) Resize(x, y, width, height, visibleX, visibleY, visibleWidth, visibleHeight int) {
 	i.x = x
 	i.y = y
 	i.width = width
 	i.height = height
+	i.visibleX = visibleX
+	i.visibleY = visibleY
+	i.visibleWidth = visibleWidth
+	i.visibleHeight = visibleHeight
 
 	i.scaleAscii = asciiart.Convert2AsciiOfWidth(i.Image, int(i.width)-1)
 }

@@ -20,6 +20,10 @@ type Grid struct {
 	y               int
 	width           int
 	height          int
+	visibleX        int
+	visibleY        int
+	visibleWidth    int
+	visibleHeight   int
 }
 
 func (g *Grid) OnEvent(app *App, e event.Event) {
@@ -39,11 +43,16 @@ func (g *Grid) AddView(v View, a Area) {
 	g.cells = append(g.cells, cell{v, a})
 }
 
-func (g *Grid) Resize(x, y, width, height int) {
+func (g *Grid) Resize(x, y, width, height, visibleX, visibleY, visibleWidth, visibleHeight int) {
 	g.x = x
 	g.y = y
 	g.width = width
 	g.height = height
+
+	g.visibleX = visibleX
+	g.visibleY = visibleY
+	g.visibleWidth = visibleWidth
+	g.visibleHeight = visibleHeight
 
 	g.columnWidths = distributeLength(width, g.ColumnSizes)
 	g.rowHeights = distributeLength(height, g.RowSizes)
@@ -71,7 +80,7 @@ func (g *Grid) Resize(x, y, width, height int) {
 			viewHeight += g.rowHeights[i]
 		}
 
-		cell.view.Resize(x+xOffset, y+yOffset, viewWidth, viewHeight)
+		cell.view.Resize(x+xOffset, y+yOffset, viewWidth, viewHeight, x+xOffset, y+yOffset, viewWidth, viewHeight)
 	}
 }
 
