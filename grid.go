@@ -22,12 +22,6 @@ type Grid struct {
 	height          uint32
 }
 
-func (g *Grid) OnLoad() {
-	for _, cell := range g.cells {
-		cell.view.OnLoad()
-	}
-}
-
 func (g *Grid) OnEvent(app *App, e event.Event) {
 	for _, cell := range g.cells {
 		cell.view.OnEvent(app, e)

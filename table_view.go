@@ -45,10 +45,6 @@ func (t *TableView) Initialize(emit func(eventType event.Type, data interface{})
 	t.grid.Initialize(emit)
 }
 
-func (t *TableView) OnLoad() {
-	t.grid.OnLoad()
-}
-
 func (t *TableView) OnEvent(app *App, e event.Event) {
 }
 

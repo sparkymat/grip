@@ -47,6 +47,3 @@ func (v *ImageView) Draw() {
 
 func (i *ImageView) OnEvent(app *App, e event.Event) {
 }
-
-func (i *ImageView) OnLoad() {
-}

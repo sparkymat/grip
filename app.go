@@ -62,8 +62,8 @@ func (a *App) SetContainer(container *Grid) {
 
 func (a *App) SetModal(m *modal) {
 	modalGrid := Grid{
-		ColumnSizes: []size.Size{size.Auto, size.WithPoints(m.width), size.Auto},
-		RowSizes:    []size.Size{size.Auto, size.WithPoints(m.height), size.Auto},
+		ColumnSizes: []size.Size{size.Auto, m.width, size.Auto},
+		RowSizes:    []size.Size{size.Auto, m.height, size.Auto},
 	}
 
 	modalGrid.AddView(m, Area{1, 1, 1, 1})
@@ -84,17 +84,7 @@ func (a App) Run() error {
 	// Draw initial
 	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
 	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	width, height := termbox.Size()
-
-	a.container.Resize(0, 0, uint32(width), uint32(height))
-	a.container.OnLoad()
-	a.container.Draw()
-
-	if a.modalVisible {
-		a.modalContainer.OnLoad()
-		a.modalContainer.Resize(0, 0, uint32(width), uint32(height))
-		a.modalContainer.Draw()
-	}
+	a.Refresh()
 
 	termbox.Flush()
 
@@ -144,21 +134,32 @@ func (a App) Run() error {
 	return err
 }
 
+func (a *App) Refresh() {
+	width, height := termbox.Size()
+
+	if a.container != nil {
+		a.container.Resize(0, 0, uint32(width), uint32(height))
+		a.container.Draw()
+	}
+
+	if a.modalVisible && a.modalContainer != nil {
+		a.modalContainer.Resize(0, 0, uint32(width), uint32(height))
+		a.modalContainer.Draw()
+	}
+}
+
 func (a *App) ShowModal() error {
 	if a.modalContainer == nil {
 		return errors.New("No modal to show")
 	}
 
 	a.modalVisible = true
-	width, height := termbox.Size()
-	a.modalContainer.Resize(0, 0, uint32(width), uint32(height))
-	a.modalContainer.OnLoad()
-	a.modalContainer.Draw()
+	a.Refresh()
 
 	return nil
 }
 
 func (a *App) HideModal() {
 	a.modalVisible = false
-	a.container.Draw()
+	a.Refresh()
 }

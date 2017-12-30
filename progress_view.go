@@ -76,6 +76,3 @@ func (p *ProgressView) Draw() {
 
 func (p *ProgressView) OnEvent(app *App, e event.Event) {
 }
-
-func (p *ProgressView) OnLoad() {
-}

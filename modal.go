@@ -8,15 +8,15 @@ import (
 type modal struct {
 	emitEvent func(event.Type, interface{})
 	grid      Grid
-	width     uint32
-	height    uint32
+	width     size.Size
+	height    size.Size
 	title     View
 	body      View
 	footer    View
 	onEvent   func(*App, event.Event)
 }
 
-func NewModal(app *App, width uint32, height uint32, title View, body View, footer View, onEvent func(*App, event.Event)) modal {
+func NewModal(app *App, width size.Size, height size.Size, title View, body View, footer View, onEvent func(*App, event.Event)) modal {
 	modalGrid := Grid{
 		ColumnSizes: []size.Size{size.Auto},
 		RowSizes:    []size.Size{size.WithPoints(1), size.Auto, size.WithPoints(3)},
@@ -48,9 +48,6 @@ func (m *modal) Draw() {
 
 func (m *modal) Resize(x, y, width, height uint32) {
 	m.grid.Resize(x, y, width, height)
-}
-
-func (m *modal) OnLoad() {
 }
 
 func (m *modal) OnEvent(app *App, ev event.Event) {

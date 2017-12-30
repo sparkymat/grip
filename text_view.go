@@ -78,6 +78,3 @@ func (t *TextView) Draw() {
 
 func (t *TextView) OnEvent(app *App, e event.Event) {
 }
-
-func (t *TextView) OnLoad() {
-}

@@ -6,7 +6,7 @@ import (
 	"github.com/sparkymat/grip/size"
 )
 
-func (a *App) Alert(message string, onDismiss func()) {
+func (a *App) Alert(message string, onDismiss func(*App)) {
 	body := Grid{
 		ColumnSizes:     []size.Size{size.WithPoints(1), size.Auto, size.WithPoints(1)},
 		RowSizes:        []size.Size{size.WithPoints(1), size.Auto, size.WithPoints(1)},
@@ -30,22 +30,22 @@ func (a *App) Alert(message string, onDismiss func()) {
 
 	footer.AddView(&TextView{
 		Text:            "Press any key...",
-		ForegroundColor: termbox.ColorBlack,
+		ForegroundColor: termbox.ColorBlack | termbox.AttrBold,
 		BackgroundColor: termbox.ColorWhite,
 		TextAlignment:   TextAlignmentCenter,
 	}, Area{1, 1, 1, 1})
 
 	m := NewModal(
 		a,
-		30,
-		16,
-		&TextView{Text: "Alert", ForegroundColor: termbox.ColorBlack, BackgroundColor: termbox.ColorWhite, TextAlignment: TextAlignmentCenter},
+		size.WithPercent(40),
+		size.WithPercent(25),
+		&TextView{Text: "Alert", ForegroundColor: termbox.ColorBlack | termbox.AttrBold, BackgroundColor: termbox.ColorWhite, TextAlignment: TextAlignmentCenter},
 		&body,
 		&footer,
 		func(app *App, ev event.Event) {
 			if ev.Type == event.SystemKeyPress {
 				app.HideModal()
-				onDismiss()
+				onDismiss(app)
 			}
 		},
 	)

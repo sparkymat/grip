@@ -41,6 +41,3 @@ func (t *InputView) OnEvent(app *App, e event.Event) {
 		return
 	}
 }
-
-func (t *InputView) OnLoad() {
-}

@@ -17,10 +17,12 @@ func OnEvent(app *App, e event.Event) {
 	case event.SystemKeyPress:
 		termboxEvent := e.Data.(termbox.Event)
 		if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyEsc {
-			termbox.Close()
-			os.Exit(0)
+			app.Confirm("Are you sure you want to quit?", func(app *App) {
+				termbox.Close()
+				os.Exit(0)
+			}, func(app *App) {})
 		} else if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyF1 {
-			app.Alert("Hello", func() {})
+			app.Alert("Hello", func(app *App) {})
 		}
 		break
 	}
