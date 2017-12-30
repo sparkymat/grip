@@ -13,7 +13,7 @@ type Grid struct {
 	ColumnSizes     []size.Size
 	RowSizes        []size.Size
 	app             *App
-	cells           []cell
+	cells           map[ViewID]cell
 	columnWidths    []int
 	rowHeights      []int
 	x               int
@@ -39,8 +39,18 @@ func (g *Grid) Initialize(emit func(eventType event.Type, data interface{})) {
 	}
 }
 
-func (g *Grid) AddView(v View, a Area) {
-	g.cells = append(g.cells, cell{v, a})
+func (g *Grid) AddView(id ViewID, v View, a Area) error {
+	if g.cells == nil {
+		g.cells = make(map[ViewID]cell)
+	}
+
+	if _, ok := g.cells[id]; ok {
+		panic("This view ID is already registered")
+	}
+
+	g.cells[id] = cell{v, a}
+
+	return nil
 }
 
 func (g *Grid) Resize(x, y, width, height, visibleX, visibleY, visibleWidth, visibleHeight int) {

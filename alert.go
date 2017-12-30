@@ -14,7 +14,7 @@ func (a *App) Alert(message string, onDismiss func(*App)) {
 		BackgroundColor: termbox.ColorWhite,
 	}
 
-	body.AddView(&TextView{
+	body.AddView("body-text", &TextView{
 		Text:            message,
 		ForegroundColor: termbox.ColorBlack,
 		BackgroundColor: termbox.ColorWhite,
@@ -28,7 +28,7 @@ func (a *App) Alert(message string, onDismiss func(*App)) {
 		BackgroundColor: termbox.ColorWhite,
 	}
 
-	footer.AddView(&TextView{
+	footer.AddView("footer-text", &TextView{
 		Text:            "Press any key...",
 		ForegroundColor: termbox.ColorBlack | termbox.AttrBold,
 		BackgroundColor: termbox.ColorWhite,

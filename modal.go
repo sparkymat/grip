@@ -22,9 +22,9 @@ func NewModal(app *App, width size.Size, height size.Size, title View, body View
 		RowSizes:    []size.Size{size.WithPoints(1), size.Auto, size.WithPoints(3)},
 	}
 
-	modalGrid.AddView(title, Area{0, 0, 0, 0})
-	modalGrid.AddView(body, Area{0, 0, 1, 1})
-	modalGrid.AddView(footer, Area{0, 0, 2, 2})
+	modalGrid.AddView("title", title, Area{0, 0, 0, 0})
+	modalGrid.AddView("body", body, Area{0, 0, 1, 1})
+	modalGrid.AddView("footer", footer, Area{0, 0, 2, 2})
 
 	return modal{
 		width:   width,

@@ -36,8 +36,8 @@ func NewTableView(columnSizes []size.Size, rowSizes []size.Size, foregroundColor
 	}
 }
 
-func (t *TableView) AddView(v View, a Area) {
-	t.grid.AddView(v, Area{a.ColumnStart*2 + 1, a.ColumnEnd*2 + 1, a.RowStart*2 + 1, a.RowEnd*2 + 1})
+func (t *TableView) AddView(id ViewID, v View, a Area) {
+	t.grid.AddView(id, v, Area{a.ColumnStart*2 + 1, a.ColumnEnd*2 + 1, a.RowStart*2 + 1, a.RowEnd*2 + 1})
 }
 
 func (t *TableView) Initialize(emit func(eventType event.Type, data interface{})) {

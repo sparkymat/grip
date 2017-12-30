@@ -66,7 +66,7 @@ func (a *App) SetModal(m *modal) {
 		RowSizes:    []size.Size{size.Auto, m.height, size.Auto},
 	}
 
-	modalGrid.AddView(m, Area{1, 1, 1, 1})
+	modalGrid.AddView("modal", m, Area{1, 1, 1, 1})
 
 	a.modalContainer = &modalGrid
 	a.modalContainer.Initialize(a.EmitModalEvent)

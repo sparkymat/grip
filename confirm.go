@@ -14,7 +14,7 @@ func (a *App) Confirm(message string, onConfirm func(*App), onDismiss func(*App)
 		BackgroundColor: termbox.ColorWhite,
 	}
 
-	body.AddView(&TextView{
+	body.AddView("body-text", &TextView{
 		Text:            message,
 		ForegroundColor: termbox.ColorBlack,
 		BackgroundColor: termbox.ColorWhite,
@@ -32,7 +32,8 @@ func (a *App) Confirm(message string, onConfirm func(*App), onDismiss func(*App)
 		HasBackground:   true,
 		BackgroundColor: termbox.ColorGreen,
 	}
-	yesBox.AddView(&TextView{
+
+	yesBox.AddView("yes-text", &TextView{
 		Text:            "[Y]es",
 		ForegroundColor: termbox.ColorBlack | termbox.AttrBold,
 		BackgroundColor: termbox.ColorGreen,
@@ -45,15 +46,15 @@ func (a *App) Confirm(message string, onConfirm func(*App), onDismiss func(*App)
 		HasBackground:   true,
 		BackgroundColor: termbox.ColorRed,
 	}
-	noBox.AddView(&TextView{
+	noBox.AddView("no-text", &TextView{
 		Text:            "[N]o",
 		ForegroundColor: termbox.ColorBlack | termbox.AttrBold,
 		BackgroundColor: termbox.ColorRed,
 		TextAlignment:   TextAlignmentCenter,
 	}, Area{1, 1, 1, 1})
 
-	footer.AddView(&noBox, Area{0, 0, 0, 0})
-	footer.AddView(&yesBox, Area{1, 1, 0, 0})
+	footer.AddView("no-box", &noBox, Area{0, 0, 0, 0})
+	footer.AddView("yes-box", &yesBox, Area{1, 1, 0, 0})
 
 	m := NewModal(
 		a,
