@@ -38,7 +38,7 @@ func NewModal(app *App, width uint32, height uint32, title View, body View, foot
 	}
 }
 
-func (m *modal) Initialize(register func(event.Type, event.EventHandler), emit func(event.Type, interface{}) error) {
+func (m *modal) Initialize(register func(event.Type, EventHandler), emit func(event.Type, interface{}) error) {
 	m.grid.Initialize(register, emit)
 }
 
@@ -53,6 +53,6 @@ func (m *modal) Resize(x, y, width, height uint32) {
 func (m *modal) OnLoad() {
 }
 
-func (m *modal) OnEvent(ev event.Event) {
+func (m *modal) OnEvent(app *App, ev event.Event) {
 	m.onEvent(ev)
 }

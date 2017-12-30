@@ -27,10 +27,10 @@ func (g *Grid) OnLoad() {
 	}
 }
 
-func (g *Grid) OnEvent(e event.Event) {
+func (g *Grid) OnEvent(app *App, e event.Event) {
 }
 
-func (g *Grid) Initialize(register func(eventType event.Type, handler event.EventHandler), emit func(eventType event.Type, data interface{}) error) {
+func (g *Grid) Initialize(register func(eventType event.Type, handler EventHandler), emit func(eventType event.Type, data interface{}) error) {
 	for _, cell := range g.cells {
 		cell.view.Initialize(register, emit)
 	}

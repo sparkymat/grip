@@ -16,7 +16,7 @@ type TestEventHandler struct {
 	App *App
 }
 
-func (t TestEventHandler) OnEvent(e event.Event) {
+func (t TestEventHandler) OnEvent(app *App, e event.Event) {
 	switch e.Type {
 	case event.SystemKeyPress:
 		termboxEvent := e.Data.(termbox.Event)

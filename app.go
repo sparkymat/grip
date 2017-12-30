@@ -9,40 +9,44 @@ import (
 	"github.com/sparkymat/grip/size"
 )
 
+type EventHandler interface {
+	OnEvent(app *App, e event.Event)
+}
+
 type App struct {
 	container            *Grid
-	eventListeners       map[event.Type][]event.EventHandler
-	globalEventListeners map[event.Type][]event.EventHandler
+	eventListeners       map[event.Type][]EventHandler
+	globalEventListeners map[event.Type][]EventHandler
 	modalContainer       *Grid
-	modalEventListeners  map[event.Type][]event.EventHandler
+	modalEventListeners  map[event.Type][]EventHandler
 	modalVisible         bool
 }
 
-func (a *App) registerModalEventListener(eventType event.Type, handler event.EventHandler) {
+func (a *App) registerModalEventListener(eventType event.Type, handler EventHandler) {
 	if _, ok := a.modalEventListeners[eventType]; !ok {
-		a.modalEventListeners[eventType] = []event.EventHandler{}
+		a.modalEventListeners[eventType] = []EventHandler{}
 	}
 
 	listeners := append(a.modalEventListeners[eventType], handler)
 	a.modalEventListeners[eventType] = listeners
 }
 
-func (a *App) registerEventListener(eventType event.Type, handler event.EventHandler) {
+func (a *App) registerEventListener(eventType event.Type, handler EventHandler) {
 	if _, ok := a.eventListeners[eventType]; !ok {
-		a.eventListeners[eventType] = []event.EventHandler{}
+		a.eventListeners[eventType] = []EventHandler{}
 	}
 
 	listeners := append(a.eventListeners[eventType], handler)
 	a.eventListeners[eventType] = listeners
 }
 
-func (a *App) RegisterGlobalEventListener(eventType event.Type, handler event.EventHandler) {
+func (a *App) RegisterGlobalEventListener(eventType event.Type, handler EventHandler) {
 	if a.globalEventListeners == nil {
-		a.globalEventListeners = make(map[event.Type][]event.EventHandler)
+		a.globalEventListeners = make(map[event.Type][]EventHandler)
 	}
 
 	if _, ok := a.globalEventListeners[eventType]; !ok {
-		a.globalEventListeners[eventType] = []event.EventHandler{}
+		a.globalEventListeners[eventType] = []EventHandler{}
 	}
 
 	listeners := append(a.globalEventListeners[eventType], handler)
@@ -55,7 +59,7 @@ func (a *App) EmitGlobalEvent(eventType event.Type, data interface{}) error {
 	}
 
 	for _, registeredView := range a.globalEventListeners[eventType] {
-		go registeredView.OnEvent(event.Event{eventType, data})
+		go registeredView.OnEvent(a, event.Event{eventType, data})
 	}
 
 	return nil
@@ -67,7 +71,7 @@ func (a *App) EmitEvent(eventType event.Type, data interface{}) error {
 	}
 
 	for _, registeredView := range a.eventListeners[eventType] {
-		go registeredView.OnEvent(event.Event{eventType, data})
+		go registeredView.OnEvent(a, event.Event{eventType, data})
 	}
 
 	return nil
@@ -79,14 +83,14 @@ func (a *App) EmitModalEvent(eventType event.Type, data interface{}) error {
 	}
 
 	for _, registeredView := range a.modalEventListeners[eventType] {
-		go registeredView.OnEvent(event.Event{eventType, data})
+		go registeredView.OnEvent(a, event.Event{eventType, data})
 	}
 
 	return nil
 }
 
 func (a *App) SetContainer(container *Grid) {
-	a.eventListeners = make(map[event.Type][]event.EventHandler)
+	a.eventListeners = make(map[event.Type][]EventHandler)
 	a.container = container
 	a.container.Initialize(a.registerEventListener, a.EmitEvent)
 }
@@ -99,7 +103,7 @@ func (a *App) SetModal(m *modal) {
 
 	modalGrid.AddView(m, Area{1, 1, 1, 1})
 
-	a.modalEventListeners = make(map[event.Type][]event.EventHandler)
+	a.modalEventListeners = make(map[event.Type][]EventHandler)
 	a.modalContainer = &modalGrid
 	a.modalContainer.Initialize(a.registerModalEventListener, a.EmitModalEvent)
 }

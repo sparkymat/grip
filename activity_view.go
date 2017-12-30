@@ -21,7 +21,7 @@ type ActivityView struct {
 	speedX          int32
 }
 
-func (a *ActivityView) Initialize(register func(eventType event.Type, handler event.EventHandler), emit func(eventType event.Type, data interface{}) error) {
+func (a *ActivityView) Initialize(register func(eventType event.Type, handler EventHandler), emit func(eventType event.Type, data interface{}) error) {
 }
 
 func (a *ActivityView) Resize(x, y, width, height uint32) {
@@ -74,5 +74,5 @@ func (a *ActivityView) OnLoad() {
 	}()
 }
 
-func (a *ActivityView) OnEvent(e event.Event) {
+func (a *ActivityView) OnEvent(app *App, e event.Event) {
 }

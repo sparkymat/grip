@@ -39,7 +39,7 @@ func (t *TableView) AddView(v View, a Area) {
 	t.grid.AddView(v, Area{a.ColumnStart*2 + 1, a.ColumnEnd*2 + 1, a.RowStart*2 + 1, a.RowEnd*2 + 1})
 }
 
-func (t *TableView) Initialize(register func(eventType event.Type, handler event.EventHandler), emit func(eventType event.Type, data interface{}) error) {
+func (t *TableView) Initialize(register func(eventType event.Type, handler EventHandler), emit func(eventType event.Type, data interface{}) error) {
 	t.grid.Initialize(register, emit)
 }
 
@@ -47,7 +47,7 @@ func (t *TableView) OnLoad() {
 	t.grid.OnLoad()
 }
 
-func (t *TableView) OnEvent(e event.Event) {
+func (t *TableView) OnEvent(app *App, e event.Event) {
 }
 
 func (t *TableView) Resize(x, y, width, height uint32) {

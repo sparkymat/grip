@@ -11,7 +11,7 @@ type InputView struct {
 	TextView TextView
 }
 
-func (t *InputView) Initialize(register func(eventType event.Type, handler event.EventHandler), emit func(eventType event.Type, data interface{}) error) {
+func (t *InputView) Initialize(register func(eventType event.Type, handler EventHandler), emit func(eventType event.Type, data interface{}) error) {
 	register(event.SystemKeyPress, t)
 
 	t.TextView.Initialize(register, emit)
@@ -25,7 +25,7 @@ func (t *InputView) Draw() {
 	t.TextView.Draw()
 }
 
-func (t *InputView) OnEvent(e event.Event) {
+func (t *InputView) OnEvent(app *App, e event.Event) {
 	switch e.Type {
 	case event.SystemKeyPress:
 		ev := e.Data.(termbox.Event)

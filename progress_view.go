@@ -26,7 +26,7 @@ type ProgressView struct {
 	y               uint32
 }
 
-func (p *ProgressView) Initialize(register func(eventType event.Type, handler event.EventHandler), emit func(eventType event.Type, data interface{}) error) {
+func (p *ProgressView) Initialize(register func(eventType event.Type, handler EventHandler), emit func(eventType event.Type, data interface{}) error) {
 }
 
 func (p *ProgressView) Resize(x, y, width, height uint32) {
@@ -73,7 +73,7 @@ func (p *ProgressView) Draw() {
 	}
 }
 
-func (p *ProgressView) OnEvent(e event.Event) {
+func (p *ProgressView) OnEvent(app *App, e event.Event) {
 }
 
 func (p *ProgressView) OnLoad() {
