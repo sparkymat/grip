@@ -36,10 +36,16 @@ func (v *ImageView) Draw() {
 			if j*v.rect.Width+i < len(v.scaleAscii) {
 				r = rune(v.scaleAscii[j*v.rect.Width+i])
 			}
-			termbox.SetCell(i, j, r, v.ForegroundColor, v.BackgroundColor)
+			v.SetCellIfVisible(i, j, r, v.ForegroundColor, v.BackgroundColor)
 		}
 	}
 }
 
 func (i *ImageView) OnEvent(app *App, e event.Event) {
+}
+
+func (i *ImageView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
+	if i.visibleRect.Contains(x, y) {
+		termbox.SetCell(x, y, ch, fg, bg)
+	}
 }

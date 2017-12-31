@@ -1,6 +1,7 @@
 package grip
 
 import (
+	termbox "github.com/nsf/termbox-go"
 	"github.com/sparkymat/grip/event"
 	"github.com/sparkymat/grip/size"
 )
@@ -58,4 +59,8 @@ func (m *modal) OnEvent(app *App, ev event.Event) {
 
 func (m *modal) Find(path ...ViewID) (View, error) {
 	return m.grid.Find(path...)
+}
+
+func (m *modal) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
+	m.grid.SetCellIfVisible(x, y, ch, fg, bg)
 }

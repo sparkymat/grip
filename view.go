@@ -1,6 +1,9 @@
 package grip
 
-import "github.com/sparkymat/grip/event"
+import (
+	termbox "github.com/nsf/termbox-go"
+	"github.com/sparkymat/grip/event"
+)
 
 type ViewID string
 
@@ -14,4 +17,5 @@ type View interface {
 	OnEvent(app *App, e event.Event)
 	Resize(rect Rect, visibleRect Rect)
 	Draw()
+	SetCellIfVisible(int, int, rune, termbox.Attribute, termbox.Attribute)
 }

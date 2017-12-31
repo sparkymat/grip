@@ -135,7 +135,7 @@ func (g *Grid) Draw() {
 	if g.HasBackground {
 		for j := g.rect.Y; j < g.rect.Y+g.rect.Height; j++ {
 			for i := g.rect.X; i < g.rect.X+g.rect.Width; i++ {
-				termbox.SetCell(i, j, ' ', g.BackgroundColor, g.BackgroundColor)
+				g.SetCellIfVisible(i, j, ' ', g.BackgroundColor, g.BackgroundColor)
 			}
 		}
 	}
@@ -183,4 +183,10 @@ func (g *Grid) Find(path ...ViewID) (View, error) {
 	}
 
 	return nil, nil
+}
+
+func (g *Grid) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
+	if g.visibleRect.Contains(x, y) {
+		termbox.SetCell(x, y, ch, fg, bg)
+	}
 }

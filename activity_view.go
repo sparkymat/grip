@@ -71,3 +71,9 @@ func (a *ActivityView) Draw() {
 
 func (a *ActivityView) OnEvent(app *App, e event.Event) {
 }
+
+func (a *ActivityView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
+	if a.visibleRect.Contains(x, y) {
+		termbox.SetCell(x, y, ch, fg, bg)
+	}
+}

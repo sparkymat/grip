@@ -46,7 +46,7 @@ func (t *TextView) Draw() {
 
 		if len(line) < t.rect.Width {
 			for i := t.rect.X; i <= (t.rect.X + t.rect.Width - 1); i++ {
-				termbox.SetCell(i, j, ' ', t.ForegroundColor, t.BackgroundColor)
+				t.SetCellIfVisible(i, j, ' ', t.ForegroundColor, t.BackgroundColor)
 			}
 		}
 
@@ -65,10 +65,16 @@ func (t *TextView) Draw() {
 			for i := textStart; i <= textEnd; i++ {
 				if i-textStart < len(line) {
 					char := rune(line[i-textStart])
-					termbox.SetCell(i, j, char, t.ForegroundColor, t.BackgroundColor)
+					t.SetCellIfVisible(i, j, char, t.ForegroundColor, t.BackgroundColor)
 				}
 			}
 		}
+	}
+}
+
+func (t *TextView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
+	if t.visibleRect.Contains(x, y) {
+		termbox.SetCell(x, y, ch, fg, bg)
 	}
 }
 

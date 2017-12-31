@@ -41,3 +41,7 @@ func (t *InputView) OnEvent(app *App, e event.Event) {
 		return
 	}
 }
+
+func (t *InputView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
+	t.TextView.SetCellIfVisible(x, y, ch, fg, bg)
+}

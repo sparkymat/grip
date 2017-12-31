@@ -35,11 +35,11 @@ func (p *ProgressView) Resize(rect, visibleRect Rect) {
 
 func (p *ProgressView) Draw() {
 	for j := p.rect.Y; j <= (p.rect.Y + p.rect.Height - 1); j++ {
-		termbox.SetCell(int(p.rect.X), int(j), '[', p.ForegroundColor, p.BackgroundColor)
+		p.SetCellIfVisible(p.rect.X, j, '[', p.ForegroundColor, p.BackgroundColor)
 		for i := p.rect.X + 1; i < (p.rect.X + p.rect.Width - 1); i++ {
-			termbox.SetCell(int(i), int(j), ' ', p.ForegroundColor, p.BackgroundColor)
+			p.SetCellIfVisible(i, j, ' ', p.ForegroundColor, p.BackgroundColor)
 		}
-		termbox.SetCell(int(p.rect.X+p.rect.Width-1), int(j), ']', p.ForegroundColor, p.BackgroundColor)
+		p.SetCellIfVisible(p.rect.X+p.rect.Width-1, j, ']', p.ForegroundColor, p.BackgroundColor)
 
 		var fractionComplete float32 = 0.0
 		if p.MaximumValue != p.MinimumValue {
@@ -48,7 +48,7 @@ func (p *ProgressView) Draw() {
 			maxX := p.rect.X + p.rect.Width - 2
 			currentMaxX := minX + int(float32(maxX-minX)*fractionComplete)
 			for i := minX; i <= currentMaxX; i++ {
-				termbox.SetCell(i, j, '=', p.ForegroundColor, p.BackgroundColor)
+				p.SetCellIfVisible(i, j, '=', p.ForegroundColor, p.BackgroundColor)
 			}
 		}
 
@@ -65,10 +65,16 @@ func (p *ProgressView) Draw() {
 		textX := p.rect.X + (p.rect.Width-len(displayText))/2
 		for i := textX; i < textX+len(displayText); i++ {
 			char := rune(displayText[i-textX])
-			termbox.SetCell(i, j, char, p.ForegroundColor, p.BackgroundColor)
+			p.SetCellIfVisible(i, j, char, p.ForegroundColor, p.BackgroundColor)
 		}
 	}
 }
 
 func (p *ProgressView) OnEvent(app *App, e event.Event) {
+}
+
+func (p *ProgressView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
+	if p.visibleRect.Contains(x, y) {
+		termbox.SetCell(x, y, ch, fg, bg)
+	}
 }

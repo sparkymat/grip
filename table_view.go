@@ -62,7 +62,7 @@ func (t *TableView) Draw() {
 		if idx%2 == 0 {
 			junctionXs = append(junctionXs, i)
 			for j := t.grid.rect.Y; j < t.grid.rect.Y+t.grid.rect.Height; j++ {
-				termbox.SetCell(i, j, '│', t.foregroundColor, t.backgroundColor)
+				t.SetCellIfVisible(i, j, '│', t.foregroundColor, t.backgroundColor)
 			}
 		}
 
@@ -75,7 +75,7 @@ func (t *TableView) Draw() {
 		if idx%2 == 0 {
 			junctionYs = append(junctionYs, j)
 			for i := t.grid.rect.X; i < t.grid.rect.X+t.grid.rect.Width; i++ {
-				termbox.SetCell(i, j, '─', t.foregroundColor, t.backgroundColor)
+				t.SetCellIfVisible(i, j, '─', t.foregroundColor, t.backgroundColor)
 			}
 		}
 
@@ -85,23 +85,23 @@ func (t *TableView) Draw() {
 	for _, i := range junctionXs {
 		for _, j := range junctionYs {
 			if i == t.grid.rect.X && j == t.grid.rect.Y {
-				termbox.SetCell(i, j, '┌', t.foregroundColor, t.backgroundColor)
+				t.SetCellIfVisible(i, j, '┌', t.foregroundColor, t.backgroundColor)
 			} else if i == t.grid.rect.X && j == t.grid.rect.Y+t.grid.rect.Height-1 {
-				termbox.SetCell(i, j, '└', t.foregroundColor, t.backgroundColor)
+				t.SetCellIfVisible(i, j, '└', t.foregroundColor, t.backgroundColor)
 			} else if i == t.grid.rect.X+t.grid.rect.Width-1 && j == t.grid.rect.Y {
-				termbox.SetCell(i, j, '┐', t.foregroundColor, t.backgroundColor)
+				t.SetCellIfVisible(i, j, '┐', t.foregroundColor, t.backgroundColor)
 			} else if i == t.grid.rect.X+t.grid.rect.Width-1 && j == t.grid.rect.Y+t.grid.rect.Height-1 {
-				termbox.SetCell(i, j, '┘', t.foregroundColor, t.backgroundColor)
+				t.SetCellIfVisible(i, j, '┘', t.foregroundColor, t.backgroundColor)
 			} else if i == t.grid.rect.X {
-				termbox.SetCell(i, j, '├', t.foregroundColor, t.backgroundColor)
+				t.SetCellIfVisible(i, j, '├', t.foregroundColor, t.backgroundColor)
 			} else if i == t.grid.rect.X+t.grid.rect.Width-1 {
-				termbox.SetCell(i, j, '┤', t.foregroundColor, t.backgroundColor)
+				t.SetCellIfVisible(i, j, '┤', t.foregroundColor, t.backgroundColor)
 			} else if j == t.grid.rect.Y {
-				termbox.SetCell(i, j, '┬', t.foregroundColor, t.backgroundColor)
+				t.SetCellIfVisible(i, j, '┬', t.foregroundColor, t.backgroundColor)
 			} else if j == t.grid.rect.Y+t.grid.rect.Height-1 {
-				termbox.SetCell(i, j, '┴', t.foregroundColor, t.backgroundColor)
+				t.SetCellIfVisible(i, j, '┴', t.foregroundColor, t.backgroundColor)
 			} else {
-				termbox.SetCell(i, j, '┼', t.foregroundColor, t.backgroundColor)
+				t.SetCellIfVisible(i, j, '┼', t.foregroundColor, t.backgroundColor)
 			}
 		}
 	}
@@ -111,4 +111,8 @@ func (t *TableView) Draw() {
 
 func (t *TableView) Find(path ...ViewID) (View, error) {
 	return t.grid.Find(path...)
+}
+
+func (t *TableView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
+	t.grid.SetCellIfVisible(x, y, ch, fg, bg)
 }
