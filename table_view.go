@@ -108,3 +108,7 @@ func (t *TableView) Draw() {
 
 	t.grid.Draw()
 }
+
+func (t *TableView) Find(path ...ViewID) (View, error) {
+	return t.grid.Find(path...)
+}

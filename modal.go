@@ -55,3 +55,7 @@ func (m *modal) OnEvent(app *App, ev event.Event) {
 		m.onEvent(app, ev)
 	}
 }
+
+func (m *modal) Find(path ...ViewID) (View, error) {
+	return m.grid.Find(path...)
+}

@@ -4,8 +4,10 @@ import "github.com/sparkymat/grip/event"
 
 type ViewID string
 
-const AppRootID ViewID = "app-root"
-const ModalRootID ViewID = "modal-root"
+const AppRoot ViewID = "app-root"
+const ModalRoot ViewID = "modal-root"
+
+const WildCardPath ViewID = "*"
 
 type View interface {
 	Initialize(emitEvent func(eventType event.Type, data interface{}))

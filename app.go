@@ -12,9 +12,9 @@ import (
 type EventHandler func(*App, event.Event)
 
 type App struct {
-	container            View
+	container            ViewContainer
 	globalEventListeners map[event.Type][]EventHandler
-	modalContainer       View
+	modalContainer       ViewContainer
 	modalVisible         bool
 }
 
@@ -152,4 +152,31 @@ func (a *App) ShowModal() error {
 func (a *App) HideModal() {
 	a.modalVisible = false
 	a.Refresh()
+}
+
+func (a *App) Find(path ...ViewID) (View, error) {
+	if path == nil || len(path) == 0 {
+		return nil, errors.New("View not found")
+	}
+
+	currentID := path[0]
+	remainingPath := path[1:]
+
+	if currentID == WildCardPath {
+		if a.modalVisible {
+			if a.modalContainer != nil {
+				return a.modalContainer.Find(path...)
+			}
+		} else {
+			if a.container != nil {
+				return a.container.Find(path...)
+			}
+		}
+	} else if currentID == AppRoot && a.container != nil {
+		return a.container.Find(remainingPath...)
+	} else if currentID == ModalRoot && a.modalVisible && a.modalContainer != nil {
+		return a.modalContainer.Find(remainingPath...)
+	}
+
+	return nil, errors.New("View not found")
 }

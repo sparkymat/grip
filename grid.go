@@ -1,6 +1,8 @@
 package grip
 
 import (
+	"errors"
+
 	termbox "github.com/nsf/termbox-go"
 	"github.com/sparkymat/grip/event"
 	"github.com/sparkymat/grip/size"
@@ -142,4 +144,44 @@ func (g *Grid) Draw() {
 	for _, cell := range g.cells {
 		cell.view.Draw()
 	}
+}
+
+func (g *Grid) Find(path ...ViewID) (View, error) {
+	if path == nil || len(path) == 0 {
+		return nil, errors.New("View not found")
+	}
+	currentID := path[0]
+	remainingPath := path[1:]
+
+	if currentID == WildCardPath {
+		matchedView, err := g.Find(remainingPath...)
+		if err == nil {
+			return matchedView, nil
+		}
+
+		for _, cell := range g.cells {
+			if matchedViewContainer, isViewContainer := cell.view.(ViewContainer); isViewContainer {
+				matchedView, err := matchedViewContainer.Find(path...)
+				if err == nil {
+					return matchedView, nil
+				}
+			}
+		}
+
+		return nil, errors.New("View not found")
+	} else {
+		if matchedCell, viewFound := g.cells[currentID]; viewFound {
+			if len(remainingPath) == 0 {
+				return matchedCell.view, nil
+			} else if matchedViewContainer, isViewContainer := matchedCell.view.(ViewContainer); isViewContainer {
+				return matchedViewContainer.Find(remainingPath...)
+			} else {
+				return nil, errors.New("View not found")
+			}
+		} else {
+			return nil, errors.New("View not found")
+		}
+	}
+
+	return nil, nil
 }
