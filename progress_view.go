@@ -20,44 +20,32 @@ type ProgressView struct {
 	Type            ProgressViewType
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
-	height          int
-	width           int
-	x               int
-	y               int
-	visibleHeight   int
-	visibleWidth    int
-	visibleX        int
-	visibleY        int
+	rect            Rect
+	visibleRect     Rect
 }
 
 func (p *ProgressView) Initialize(emit func(eventType event.Type, data interface{})) {
 	p.emitEvent = emit
 }
 
-func (p *ProgressView) Resize(x, y, width, height, visibleX, visibleY, visibleWidth, visibleHeight int) {
-	p.x = x
-	p.y = y
-	p.width = width
-	p.height = height
-	p.visibleX = visibleX
-	p.visibleY = visibleY
-	p.visibleWidth = visibleWidth
-	p.visibleHeight = visibleHeight
+func (p *ProgressView) Resize(rect, visibleRect Rect) {
+	p.rect = rect
+	p.visibleRect = visibleRect
 }
 
 func (p *ProgressView) Draw() {
-	for j := p.y; j <= (p.y + p.height - 1); j++ {
-		termbox.SetCell(int(p.x), int(j), '[', p.ForegroundColor, p.BackgroundColor)
-		for i := p.x + 1; i < (p.x + p.width - 1); i++ {
+	for j := p.rect.Y; j <= (p.rect.Y + p.rect.Height - 1); j++ {
+		termbox.SetCell(int(p.rect.X), int(j), '[', p.ForegroundColor, p.BackgroundColor)
+		for i := p.rect.X + 1; i < (p.rect.X + p.rect.Width - 1); i++ {
 			termbox.SetCell(int(i), int(j), ' ', p.ForegroundColor, p.BackgroundColor)
 		}
-		termbox.SetCell(int(p.x+p.width-1), int(j), ']', p.ForegroundColor, p.BackgroundColor)
+		termbox.SetCell(int(p.rect.X+p.rect.Width-1), int(j), ']', p.ForegroundColor, p.BackgroundColor)
 
 		var fractionComplete float32 = 0.0
 		if p.MaximumValue != p.MinimumValue {
 			fractionComplete = float32(p.CurrentValue) / float32(p.MaximumValue-p.MinimumValue)
-			minX := p.x + 1
-			maxX := p.x + p.width - 2
+			minX := p.rect.X + 1
+			maxX := p.rect.X + p.rect.Width - 2
 			currentMaxX := minX + int(float32(maxX-minX)*fractionComplete)
 			for i := minX; i <= currentMaxX; i++ {
 				termbox.SetCell(i, j, '=', p.ForegroundColor, p.BackgroundColor)
@@ -74,7 +62,7 @@ func (p *ProgressView) Draw() {
 			displayText = fmt.Sprintf(" %.1f%% ", fractionComplete*100)
 			break
 		}
-		textX := p.x + (p.width-len(displayText))/2
+		textX := p.rect.X + (p.rect.Width-len(displayText))/2
 		for i := textX; i < textX+len(displayText); i++ {
 			char := rune(displayText[i-textX])
 			termbox.SetCell(i, j, char, p.ForegroundColor, p.BackgroundColor)

@@ -18,14 +18,8 @@ type Grid struct {
 	cells           map[ViewID]cell
 	columnWidths    []int
 	rowHeights      []int
-	x               int
-	y               int
-	width           int
-	height          int
-	visibleX        int
-	visibleY        int
-	visibleWidth    int
-	visibleHeight   int
+	rect            Rect
+	visibleRect     Rect
 }
 
 func (g *Grid) OnEvent(app *App, e event.Event) {
@@ -55,19 +49,12 @@ func (g *Grid) AddView(id ViewID, v View, a Area) error {
 	return nil
 }
 
-func (g *Grid) Resize(x, y, width, height, visibleX, visibleY, visibleWidth, visibleHeight int) {
-	g.x = x
-	g.y = y
-	g.width = width
-	g.height = height
+func (g *Grid) Resize(rect, visibleRect Rect) {
+	g.rect = rect
+	g.visibleRect = visibleRect
 
-	g.visibleX = visibleX
-	g.visibleY = visibleY
-	g.visibleWidth = visibleWidth
-	g.visibleHeight = visibleHeight
-
-	g.columnWidths = distributeLength(width, g.ColumnSizes)
-	g.rowHeights = distributeLength(height, g.RowSizes)
+	g.columnWidths = distributeLength(rect.Width, g.ColumnSizes)
+	g.rowHeights = distributeLength(rect.Height, g.RowSizes)
 
 	for _, cell := range g.cells {
 		var xOffset int = 0
@@ -92,7 +79,19 @@ func (g *Grid) Resize(x, y, width, height, visibleX, visibleY, visibleWidth, vis
 			viewHeight += g.rowHeights[i]
 		}
 
-		cell.view.Resize(x+xOffset, y+yOffset, viewWidth, viewHeight, x+xOffset, y+yOffset, viewWidth, viewHeight)
+		cell.view.Resize(
+			Rect{
+				X:      rect.X + xOffset,
+				Y:      rect.Y + yOffset,
+				Width:  viewWidth,
+				Height: viewHeight,
+			},
+			Rect{
+				X:      rect.X + xOffset,
+				Y:      rect.Y + yOffset,
+				Width:  viewWidth,
+				Height: viewHeight,
+			})
 	}
 }
 
@@ -134,8 +133,8 @@ func distributeLength(totalLength int, sizes []size.Size) []int {
 
 func (g *Grid) Draw() {
 	if g.HasBackground {
-		for j := g.y; j < g.y+g.height; j++ {
-			for i := g.x; i < g.x+g.width; i++ {
+		for j := g.rect.Y; j < g.rect.Y+g.rect.Height; j++ {
+			for i := g.rect.X; i < g.rect.X+g.rect.Width; i++ {
 				termbox.SetCell(i, j, ' ', g.BackgroundColor, g.BackgroundColor)
 			}
 		}

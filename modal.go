@@ -46,8 +46,8 @@ func (m *modal) Draw() {
 	m.grid.Draw()
 }
 
-func (m *modal) Resize(x, y, width, height, visibleX, visibleY, visibleWidth, visibleHeight int) {
-	m.grid.Resize(x, y, width, height, visibleX, visibleY, visibleWidth, visibleHeight)
+func (m *modal) Resize(rect, visibleRect Rect) {
+	m.grid.Resize(rect, visibleRect)
 }
 
 func (m *modal) OnEvent(app *App, ev event.Event) {

@@ -128,12 +128,38 @@ func (a *App) Refresh() {
 	width, height := termbox.Size()
 
 	if a.container != nil {
-		a.container.Resize(0, 0, width, height, 0, 0, width, height)
+		a.container.Resize(
+			Rect{
+				X:      0,
+				Y:      0,
+				Width:  width,
+				Height: height,
+			},
+			Rect{
+				X:      0,
+				Y:      0,
+				Width:  width,
+				Height: height,
+			},
+		)
 		a.container.Draw()
 	}
 
 	if a.modalVisible && a.modalContainer != nil {
-		a.modalContainer.Resize(0, 0, width, height, 0, 0, width, height)
+		a.modalContainer.Resize(
+			Rect{
+				X:      0,
+				Y:      0,
+				Width:  width,
+				Height: height,
+			},
+			Rect{
+				X:      0,
+				Y:      0,
+				Width:  width,
+				Height: height,
+			},
+		)
 		a.modalContainer.Draw()
 	}
 }

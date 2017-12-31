@@ -18,35 +18,23 @@ type TextView struct {
 	TextAlignment   TextAlignment
 	Text            string
 	Area            Area
-	height          int
-	width           int
-	x               int
-	y               int
-	visibleHeight   int
-	visibleWidth    int
-	visibleX        int
-	visibleY        int
+	rect            Rect
+	visibleRect     Rect
 }
 
 func (t *TextView) Initialize(emit func(eventType event.Type, data interface{})) {
 	t.emitEvent = emit
 }
 
-func (t *TextView) Resize(x, y, width, height, visibleX, visibleY, visibleWidth, visibleHeight int) {
-	t.x = x
-	t.y = y
-	t.width = width
-	t.height = height
-	t.visibleX = visibleX
-	t.visibleY = visibleY
-	t.visibleWidth = visibleWidth
-	t.visibleHeight = visibleHeight
+func (t *TextView) Resize(rect, visibleRect Rect) {
+	t.rect = rect
+	t.visibleRect = visibleRect
 }
 
 func (t *TextView) Draw() {
-	for j := t.y; j <= (t.y + t.height - 1); j++ {
-		startPosition := (j - t.y) * t.width
-		endPosition := startPosition + t.width - 1
+	for j := t.rect.Y; j <= (t.rect.Y + t.rect.Height - 1); j++ {
+		startPosition := (j - t.rect.Y) * t.rect.Width
+		endPosition := startPosition + t.rect.Width - 1
 		if endPosition > len(t.Text)-1 {
 			endPosition = len(t.Text) - 1
 		}
@@ -56,21 +44,21 @@ func (t *TextView) Draw() {
 			line = t.Text[startPosition : endPosition+1]
 		}
 
-		if len(line) < t.width {
-			for i := t.x; i <= (t.x + t.width - 1); i++ {
+		if len(line) < t.rect.Width {
+			for i := t.rect.X; i <= (t.rect.X + t.rect.Width - 1); i++ {
 				termbox.SetCell(i, j, ' ', t.ForegroundColor, t.BackgroundColor)
 			}
 		}
 
 		if len(line) > 0 {
-			textStart := t.x
+			textStart := t.rect.X
 			textEnd := textStart + len(line) - 1
 
 			if t.TextAlignment == TextAlignmentCenter {
-				textStart = t.x + (t.width-len(line))/2
+				textStart = t.rect.X + (t.rect.Width-len(line))/2
 				textEnd = textStart + len(line)
 			} else if t.TextAlignment == TextAlignmentRight {
-				textEnd = t.x + t.width - 1
+				textEnd = t.rect.X + t.rect.Width - 1
 				textStart = textEnd - len(line) + 1
 			}
 
