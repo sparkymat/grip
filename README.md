@@ -3,39 +3,56 @@ A UI toolkit based on termbox. Most of the paradigms used here are inspired by C
 
 ### Currently Implemented
 
-* Event broadcast
-* ActivityView
-* Grid
-* ImageView
-* ProgressView
-* TableView (similar to Grid, but with borders)
-* TextView
-* InputView (incomplete)
+* Event sending
+* Find view (by path)
+* Views
+  * ActivityView
+  * Grid
+  * ImageView
+  * Modal (+ Alert()/Confirm() helpers )
+  * ProgressView
+  * TableView (similar to Grid, but with borders)
+  * TextView
+  * InputView (incomplete)
 
 ### Example
 
 ```go
-  type TestEventHandler struct{}
+func OnEvent(app *App, e event.Event) {
+	switch e.Type {
+	case event.SystemKeyPress:
+		termboxEvent := e.Data.(termbox.Event)
+		if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyEsc {
+			app.Confirm("Are you sure you want to quit?", func(app *App) {
+				termbox.Close()
+				os.Exit(0)
+			}, func(app *App) {})
+		} else if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyF1 {
+			app.Alert("Hello", func(app *App) {})
+		} else if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeySpace {
+			manualProgressView, err := app.Find(WildCardPath, "manual-progress")
+			if err != nil {
+				panic("Unable to find manual-progress")
+			}
 
-  func (t TestEventHandler) OnEvent(e event.Event) {
-    switch e.Type {
-    case event.SystemKeyPress:
-      termboxEvent := e.Data.(termbox.Event)
-      if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyEsc {
-        termbox.Close()
-        os.Exit(0)
-      }
-      break
-    }
-  }
+			manualProgress, isProgress := manualProgressView.(*ProgressView)
+
+			if !isProgress {
+				panic("Unable to find manual-progress of type ProgressView")
+			}
+
+			manualProgress.CurrentValue += (rand.Int() % 200)
+			if manualProgress.CurrentValue > 1000 {
+				manualProgress.CurrentValue = 0
+			}
+			manualProgress.Draw()
+		}
+		break
+	}
+}
 
   // App logic
-	app := New()
-
-	app.RegisterEvents(
-		event.SystemKeyPress,
-		event.SystemTick,
-	)
+	app := App{}
 
 	mainGrid := Grid{
 		ColumnSizes: []size.Size{size.Auto, size.WithPercent(30)},
@@ -44,19 +61,19 @@ A UI toolkit based on termbox. Most of the paradigms used here are inspired by C
 
 	sidebarGrid := NewTableView(
 		[]size.Size{size.Auto},
-		[]size.Size{size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.Auto, size.Auto},
+		[]size.Size{size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.WithPoints(1), size.Auto, size.Auto},
 		termbox.ColorBlue,
 		termbox.ColorDefault,
 	)
 
-	sidebarGrid.AddView(&TextView{
+	sidebarGrid.AddView("name-text", &TextView{
 		Text:            "Name: Adam",
 		ForegroundColor: termbox.ColorWhite,
 		BackgroundColor: termbox.ColorCyan,
 		TextAlignment:   TextAlignmentCenter,
 	}, Area{0, 0, 0, 0})
 
-	sidebarGrid.AddView(&TextView{
+	sidebarGrid.AddView("class-text", &TextView{
 		Text:            "Class: Warlock",
 		ForegroundColor: termbox.ColorWhite,
 		BackgroundColor: termbox.ColorYellow,
@@ -75,26 +92,36 @@ A UI toolkit based on termbox. Most of the paradigms used here are inspired by C
 	progressTimer := time.NewTicker(time.Millisecond * 250)
 	go func() {
 		for _ = range progressTimer.C {
-			progress.CurrentValue += (rand.Int31() % 200)
+			progress.CurrentValue += (rand.Int() % 200)
 			if progress.CurrentValue > 1000 {
 				progress.CurrentValue = 0
 			}
 			progress.Draw()
 		}
 	}()
-	sidebarGrid.AddView(&progress, Area{0, 0, 2, 2})
+	sidebarGrid.AddView("progress", &progress, Area{0, 0, 2, 2})
 
-	sidebarGrid.AddView(&ActivityView{
+	progress2 := ProgressView{
+		Type:            ProgressViewTypePercentage,
+		ForegroundColor: termbox.ColorWhite,
+		BackgroundColor: termbox.ColorMagenta,
+		MinimumValue:    0,
+		MaximumValue:    1000,
+		CurrentValue:    0,
+	}
+	sidebarGrid.AddView("manual-progress", &progress2, Area{0, 0, 3, 3})
+
+	sidebarGrid.AddView("activity", &ActivityView{
 		BackgroundColor: termbox.ColorRed,
 		ForegroundColor: termbox.ColorWhite,
 		Text:            "Loading...",
-	}, Area{0, 0, 3, 3})
+	}, Area{0, 0, 4, 4})
 
-	sidebarGrid.AddView(&TextView{
+	sidebarGrid.AddView("long-text", &TextView{
 		Text:            "SidebarArea - Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eu consectetur lacus. Sed tincidunt eros non ultrices commodo. Sed ornare id dolor sed ultricies. Duis in est at nulla pretium mattis ac quis quam. Maecenas nibh nisi, rhoncus quis iaculis sit amet, semper et diam. Aenean pharetra ex non mi placerat rhoncus. Vivamus erat ante, suscipit vitae aliquet id, congue et dolor. Curabitur sed tortor tortor. Duis non sem et lacus ultrices finibus quis quis felis. Integer non elementum ante. Vestibulum vel augue ut tortor condimentum pulvinar eu blandit leo. Donec nibh nibh, tincidunt vitae risus a, consectetur suscipit felis. Quisque elementum velit nec mauris tristique, id malesuada tellus dictum.",
 		ForegroundColor: termbox.ColorWhite,
 		BackgroundColor: termbox.ColorBlue,
-	}, Area{0, 0, 4, 4})
+	}, Area{0, 0, 5, 5})
 
 	sampleTable := NewTableView(
 		[]size.Size{size.Auto, size.Auto, size.Auto},
@@ -103,7 +130,7 @@ A UI toolkit based on termbox. Most of the paradigms used here are inspired by C
 		termbox.ColorDefault,
 	)
 
-	sidebarGrid.AddView(&sampleTable, Area{0, 0, 5, 5})
+	sidebarGrid.AddView("table", &sampleTable, Area{0, 0, 6, 6})
 
 	f, err := os.Open("test.jpg")
 	if err != nil {
@@ -115,15 +142,15 @@ A UI toolkit based on termbox. Most of the paradigms used here are inspired by C
 		t.Error(err.Error())
 	}
 
-	mainGrid.AddView(&ImageView{
+	mainGrid.AddView("test-image", &ImageView{
 		Image:           img,
 		ForegroundColor: termbox.ColorDefault,
 		BackgroundColor: termbox.ColorDefault,
 	}, Area{0, 0, 0, 0})
 
-	mainGrid.AddView(&sidebarGrid, Area{1, 1, 0, 1})
+	mainGrid.AddView("sidebar-grid", &sidebarGrid, Area{1, 1, 0, 1})
 
-	mainGrid.AddView(&InputView{
+	mainGrid.AddView("main-input", &InputView{
 		TextView: TextView{
 			Text:            "",
 			ForegroundColor: termbox.ColorWhite,
@@ -131,14 +158,11 @@ A UI toolkit based on termbox. Most of the paradigms used here are inspired by C
 		},
 	}, Area{0, 0, 1, 1})
 
-	app.SetRootNode(&mainGrid)
+	app.SetContainer(&mainGrid)
 
-	v := TestEventHandler{}
-	app.RegisterEventListener(event.SystemKeyPress, v)
+	app.RegisterGlobalEventListener(event.SystemKeyPress, OnEvent)
 
 	app.Run()
-
-  // App logic
 ```
 
 produces the following
