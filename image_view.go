@@ -18,7 +18,7 @@ type ImageView struct {
 	visibleRect     Rect
 }
 
-func (i *ImageView) Initialize(emit func(eventType event.Type, data interface{})) {
+func (i *ImageView) Initialize(emit func(event.Type, interface{})) {
 	i.emitEvent = emit
 }
 
@@ -26,15 +26,22 @@ func (i *ImageView) Resize(rect, visibleRect Rect) {
 	i.rect = rect
 	i.visibleRect = visibleRect
 
-	i.scaleAscii = asciiart.Convert2AsciiOfWidth(i.Image, int(i.rect.Width)-1)
+	if i.rect.Width > 0 {
+		i.scaleAscii = asciiart.Convert2AsciiOfWidth(i.Image, int(i.rect.Width)-1)
+	}
 }
 
 func (v *ImageView) Draw() {
+	if v.scaleAscii == nil || len(v.scaleAscii) == 0 {
+		return
+	}
+
 	for j := v.rect.Y; j <= (v.rect.Y + v.rect.Height - 1); j++ {
 		for i := v.rect.X + 1; i < (v.rect.X + v.rect.Width - 1); i++ {
 			var r rune = ' '
-			if j*v.rect.Width+i < len(v.scaleAscii) {
-				r = rune(v.scaleAscii[j*v.rect.Width+i])
+			position := (j-v.rect.Y)*v.rect.Width + (i - v.rect.X)
+			if position < len(v.scaleAscii) {
+				r = rune(v.scaleAscii[position])
 			}
 			v.SetCellIfVisible(i, j, r, v.ForegroundColor, v.BackgroundColor)
 		}
