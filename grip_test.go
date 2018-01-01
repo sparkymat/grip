@@ -211,14 +211,14 @@ func TestSanity(t *testing.T) {
 		Image:           img,
 		ForegroundColor: termbox.ColorDefault,
 		BackgroundColor: termbox.ColorDefault,
-	}, Area{0, 0, 0, 0})
+	}, Area{1, 1, 0, 0})
 
 	gifView, err := NewAnimatedImageViewForGifFile("test.gif")
 	if err != nil {
 		panic(err.Error())
 	}
 
-	mainLayoutGrid.AddView("test-gif", &gifView, Area{1, 1, 0, 1})
+	mainLayoutGrid.AddView("test-gif", &gifView, Area{0, 0, 0, 1})
 
 	mainGrid.AddView("main-layout", &mainLayoutGrid, Area{0, 0, 0, 0})
 	mainGrid.AddView("sidebar-grid", &sidebarGrid, Area{1, 1, 0, 1})
