@@ -207,20 +207,50 @@ func TestSanity(t *testing.T) {
 	mainLayoutGrid.AddView("vertical-scroll", &ScrollView{
 		Direction: ScrollDirectionVertical,
 		View: &TextView{Text: `
-The Lord of the Rings is a film series consisting of three high fantasy adventure films directed by Peter Jackson. They are based on the novel The Lord of the Rings by J. R. R. Tolkien. The films are subtitled The Fellowship of the Ring (2001), The Two Towers (2002) and The Return of the King (2003). They are a New Zealand-American venture produced by WingNut Films and The Saul Zaentz Company and distributed by New Line Cinema.
+The language was announced in November 2009. It is used in some of Google's production systems, as well as by other firms.[15]
 
-Considered to be one of the biggest and most ambitious film projects ever undertaken, with an overall budget of $281 million (some sources say $310-$330 million),[2] the entire project took eight years, with the filming for all three films done simultaneously and entirely in New Zealand, Jackson's native country.[3] Each film in the series also had special extended editions released on DVD a year after their respective theatrical releases. While the films follow the book's general storyline, they do omit some of the novel's plot elements and include some additions to and deviations from the source material.
+Two major implementations exist:
+
+    Google's Go compiler, "gc", developed as open-source software. It targets various platforms including Linux, OS X, Windows, various BSD and Unix versions, and also (since 2015) mobile devices (including smartphones).[16]
+    A second compiler, gccgo, is a GCC frontend.[17][18]
+
+The "gc" toolchain has been self-hosting since version 1.5.[19]
+
+Go originated as an experiment by Google engineers Robert Griesemer, Rob Pike, and Ken Thompson to design a new programming language that would resolve common criticisms of other languages while maintaining their positive characteristics. The developers envisaged the new language as:[20]
+
+    statically typed, scalable to large systems (as Java and C++)
+    productive and readable, without too many mandatory keywords and repetition[21] ("light on the page" like dynamic languages)
+    not requiring integrated development environments, but supporting them well
+    supporting networking and multiprocessing
+
+In later interviews, all three of the language designers cited their shared dislike of C++'s complexity as a primary motivation for designing a new language.[22][23][24]
+
+Google released Go 1.0 in March 2012.[25][26]
 		`, BackgroundColor: termbox.ColorGreen, ForegroundColor: termbox.ColorBlack},
 		Size: 100,
 	}, Area{1, 1, 0, 0})
 	mainLayoutGrid.AddView("horizontal-scroll", &ScrollView{
 		Direction: ScrollDirectionHorizontal,
 		View: &TextView{Text: `
-Futurama is an American animated science fiction comedy series created by Matt Groening for the Fox Broadcasting Company. The series follows the adventures of a late-20th-century New York City pizza delivery boy, Philip J. Fry, who, after being unwittingly cryogenically frozen for one thousand years, finds employment at Planet Express, an interplanetary delivery company in the retro-futuristic 31st century. The series was envisioned by Groening in the mid-1990s while working on The Simpsons; he later brought David X. Cohen aboard to develop storylines and characters to pitch the show to Fox.
+The language was announced in November 2009. It is used in some of Google's production systems, as well as by other firms.[15]
 
-In the United States, the series aired on Fox from March 28, 1999, to August 10, 2003, before ceasing production. Futurama also aired in reruns on Cartoon Network's Adult Swim from 2003 to 2007, until the network's contract expired. It was revived in 2007 as four direct-to-video films; the last of which was released in early 2009. Comedy Central entered into an agreement with 20th Century Fox Television to syndicate the existing episodes and air the films as 16 new, half-hour episodes, constituting a fifth season.[1][2]
+Two major implementations exist:
 
-In June 2009, producing studio 20th Century Fox announced that Comedy Central had picked up the show for 26 new half-hour episodes, which began airing in 2010 and 2011.[3][4] The show was renewed for a seventh season, with the first half airing in June 2012 and the second set for mid-2013.[5][6] It was later revealed that the seventh season would be the final season, as Comedy Central announced that they would not be commissioning any further episodes. The series finale aired on September 4, 2013.[7] While Groening has said he will try to get it picked up by another network,[8] David X. Cohen stated that the episode "Meanwhile" would be the last episode of season 7 and also the series finale.[9] A 42-minute audio-only episode featuring its original cast members was released on September 14, 2017, as an episode of The Nerdist Podcast entitled Futurama: Worlds of Tomorrow Presents, RADIORAMA!.[10]
+    Google's Go compiler, "gc", developed as open-source software. It targets various platforms including Linux, OS X, Windows, various BSD and Unix versions, and also (since 2015) mobile devices (including smartphones).[16]
+    A second compiler, gccgo, is a GCC frontend.[17][18]
+
+The "gc" toolchain has been self-hosting since version 1.5.[19]
+
+Go originated as an experiment by Google engineers Robert Griesemer, Rob Pike, and Ken Thompson to design a new programming language that would resolve common criticisms of other languages while maintaining their positive characteristics. The developers envisaged the new language as:[20]
+
+    statically typed, scalable to large systems (as Java and C++)
+    productive and readable, without too many mandatory keywords and repetition[21] ("light on the page" like dynamic languages)
+    not requiring integrated development environments, but supporting them well
+    supporting networking and multiprocessing
+
+In later interviews, all three of the language designers cited their shared dislike of C++'s complexity as a primary motivation for designing a new language.[22][23][24]
+
+Google released Go 1.0 in March 2012.[25][26]
 		`, BackgroundColor: termbox.ColorBlue, ForegroundColor: termbox.ColorBlack},
 		Size: 200,
 	}, Area{0, 0, 1, 1})

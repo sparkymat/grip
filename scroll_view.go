@@ -51,9 +51,15 @@ func (s *ScrollView) Resize(rect, visibleRect Rect) {
 
 	switch s.Direction {
 	case ScrollDirectionHorizontal:
+		if s.scrollPosition+s.rect.Width > s.Size {
+			s.scrollPosition -= (s.Size - s.rect.Width)
+		}
 		s.View.Resize(Rect{X: s.rect.X - s.scrollPosition, Y: s.rect.Y, Width: s.Size, Height: s.rect.Height}, s.rect)
 		break
 	case ScrollDirectionVertical:
+		if s.scrollPosition > s.Size-s.rect.Height {
+			s.scrollPosition -= (s.Size - s.rect.Height)
+		}
 		s.View.Resize(Rect{X: s.rect.X, Y: s.rect.Y - s.scrollPosition, Width: s.rect.Width, Height: s.Size}, s.rect)
 		break
 	}
