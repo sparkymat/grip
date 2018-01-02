@@ -7,15 +7,15 @@ import (
 )
 
 type modal struct {
-	drawCell  DrawCellFn
-	emitEvent EmitEventFn
-	grid      Grid
-	width     size.Size
-	height    size.Size
-	title     View
-	body      View
-	footer    View
-	onEvent   func(*App, event.Event)
+	app     *App
+	layer   Layer
+	grid    Grid
+	width   size.Size
+	height  size.Size
+	title   View
+	body    View
+	footer  View
+	onEvent func(*App, event.Event)
 }
 
 func NewModal(app *App, width size.Size, height size.Size, title View, body View, footer View, onEvent func(*App, event.Event)) modal {
@@ -39,11 +39,11 @@ func NewModal(app *App, width size.Size, height size.Size, title View, body View
 	}
 }
 
-func (m *modal) Initialize(drawCell DrawCellFn, emitEvent EmitEventFn) {
-	m.drawCell = drawCell
-	m.emitEvent = emitEvent
+func (m *modal) Initialize(app *App, layer Layer) {
+	m.app = app
+	m.layer = layer
 
-	m.grid.Initialize(drawCell, emitEvent)
+	m.grid.Initialize(app, layer)
 }
 
 func (m *modal) Draw() {

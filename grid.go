@@ -9,13 +9,12 @@ import (
 )
 
 type Grid struct {
-	drawCell        DrawCellFn
-	emitEvent       EmitEventFn
+	app             *App
+	layer           Layer
 	HasBackground   bool
 	BackgroundColor termbox.Attribute
 	ColumnSizes     []size.Size
 	RowSizes        []size.Size
-	app             *App
 	cells           map[ViewID]cell
 	columnWidths    []int
 	rowHeights      []int
@@ -23,18 +22,18 @@ type Grid struct {
 	visibleRect     Rect
 }
 
-func (g *Grid) OnEvent(app *App, e event.Event) {
+func (g *Grid) Initialize(app *App, layer Layer) {
+	g.app = app
+	g.layer = layer
+
 	for _, cell := range g.cells {
-		cell.view.OnEvent(app, e)
+		cell.view.Initialize(app, layer)
 	}
 }
 
-func (g *Grid) Initialize(drawCell DrawCellFn, emitEvent EmitEventFn) {
-	g.drawCell = drawCell
-	g.emitEvent = emitEvent
-
+func (g *Grid) OnEvent(app *App, e event.Event) {
 	for _, cell := range g.cells {
-		cell.view.Initialize(drawCell, emitEvent)
+		cell.view.OnEvent(app, e)
 	}
 }
 
@@ -190,6 +189,6 @@ func (g *Grid) Find(path ...ViewID) (View, error) {
 
 func (g *Grid) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
 	if g.visibleRect.Contains(x, y) {
-		g.drawCell(x, y, ch, fg, bg)
+		g.app.SetCell(g.layer, x, y, ch, fg, bg)
 	}
 }

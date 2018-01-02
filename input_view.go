@@ -8,16 +8,16 @@ import (
 )
 
 type InputView struct {
-	drawCell  DrawCellFn
-	emitEvent EmitEventFn
-	TextView  TextView
+	app      *App
+	layer    Layer
+	TextView TextView
 }
 
-func (t *InputView) Initialize(drawCell DrawCellFn, emitEvent EmitEventFn) {
-	t.drawCell = drawCell
-	t.emitEvent = emitEvent
+func (t *InputView) Initialize(app *App, layer Layer) {
+	t.app = app
+	t.layer = layer
 
-	t.TextView.Initialize(drawCell, emitEvent)
+	t.TextView.Initialize(app, layer)
 }
 
 func (t *InputView) Resize(rect, visibleRect Rect) {

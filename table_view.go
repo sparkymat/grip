@@ -7,8 +7,8 @@ import (
 )
 
 type TableView struct {
-	drawCell        DrawCellFn
-	emitEvent       EmitEventFn
+	app             *App
+	layer           Layer
 	grid            Grid
 	foregroundColor termbox.Attribute
 	backgroundColor termbox.Attribute
@@ -37,11 +37,11 @@ func NewTableView(columnSizes []size.Size, rowSizes []size.Size, foregroundColor
 	}
 }
 
-func (t *TableView) Initialize(drawCell DrawCellFn, emitEvent EmitEventFn) {
-	t.drawCell = drawCell
-	t.emitEvent = emitEvent
+func (t *TableView) Initialize(app *App, layer Layer) {
+	t.app = app
+	t.layer = layer
 
-	t.grid.Initialize(drawCell, emitEvent)
+	t.grid.Initialize(app, layer)
 }
 
 func (t *TableView) AddView(id ViewID, v View, a Area) {

@@ -13,6 +13,13 @@ type EventHandler func(*App, event.Event)
 type DrawCellFn func(int, int, rune, termbox.Attribute, termbox.Attribute)
 type EmitEventFn func(event.Type, interface{})
 
+type Layer int
+
+const (
+	AppLayer Layer = iota
+	ModalLayer
+)
+
 type App struct {
 	container            ViewContainer
 	globalEventListeners map[event.Type][]EventHandler
@@ -46,21 +53,17 @@ func (a *App) EmitGlobalEvent(eventType event.Type, data interface{}) error {
 	return nil
 }
 
-func (a *App) EmitEvent(eventType event.Type, data interface{}) {
-	if a.container != nil {
+func (a *App) EmitEvent(layer Layer, eventType event.Type, data interface{}) {
+	if layer == AppLayer && a.container != nil {
 		go a.container.OnEvent(a, event.Event{Type: eventType, Data: data})
-	}
-}
-
-func (a *App) EmitModalEvent(eventType event.Type, data interface{}) {
-	if a.modalContainer != nil {
+	} else if layer == ModalLayer && a.modalVisible && a.modalContainer != nil {
 		go a.modalContainer.OnEvent(a, event.Event{Type: eventType, Data: data})
 	}
 }
 
 func (a *App) SetContainer(container *Grid) {
 	a.container = container
-	a.container.Initialize(a.MainSetCell, a.EmitEvent)
+	a.container.Initialize(a, AppLayer)
 }
 
 func (a *App) SetModal(m *modal) {
@@ -72,7 +75,7 @@ func (a *App) SetModal(m *modal) {
 	modalGrid.AddView("modal", m, Area{1, 1, 1, 1})
 
 	a.modalContainer = &modalGrid
-	a.modalContainer.Initialize(a.ModalSetCell, a.EmitModalEvent)
+	a.modalContainer.Initialize(a, ModalLayer)
 }
 
 func (a App) Run() error {
@@ -94,8 +97,8 @@ func (a App) Run() error {
 	refreshTicker := time.NewTicker(time.Millisecond * 16)
 	go func() {
 		for t := range refreshTicker.C {
-			a.EmitEvent(event.SystemTick, t)
-			a.EmitModalEvent(event.SystemTick, t)
+			a.EmitEvent(AppLayer, event.SystemTick, t)
+			a.EmitEvent(ModalLayer, event.SystemTick, t)
 			a.EmitGlobalEvent(event.SystemTick, t)
 			termbox.Flush()
 		}
@@ -111,10 +114,10 @@ func (a App) Run() error {
 		case termbox.EventKey:
 
 			if a.modalVisible {
-				a.EmitModalEvent(event.SystemKeyPress, ev)
+				a.EmitEvent(ModalLayer, event.SystemKeyPress, ev)
 			} else {
 				a.EmitGlobalEvent(event.SystemKeyPress, ev)
-				a.EmitEvent(event.SystemKeyPress, ev)
+				a.EmitEvent(AppLayer, event.SystemKeyPress, ev)
 			}
 			break
 		case termbox.EventError:
@@ -217,12 +220,8 @@ func (a *App) Find(path ...ViewID) (View, error) {
 	return nil, errors.New("View not found")
 }
 
-func (a *App) MainSetCell(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
-	if !a.modalVisible || a.modalContainer == nil || !a.modalRect.Contains(x, y) {
+func (a *App) SetCell(layer Layer, x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
+	if layer == ModalLayer || !(a.modalVisible && a.modalContainer != nil && a.modalRect.Contains(x, y)) {
 		termbox.SetCell(x, y, ch, fg, bg)
 	}
-}
-
-func (a *App) ModalSetCell(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
-	termbox.SetCell(x, y, ch, fg, bg)
 }

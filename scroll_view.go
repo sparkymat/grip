@@ -13,8 +13,8 @@ const ScrollDirectionHorizontal ScrollDirection = 0
 const ScrollDirectionVertical ScrollDirection = 1
 
 type ScrollView struct {
-	drawCell       DrawCellFn
-	emitEvent      EmitEventFn
+	app            *App
+	layer          Layer
 	View           View
 	Direction      ScrollDirection
 	Size           int
@@ -23,13 +23,13 @@ type ScrollView struct {
 	visibleRect    Rect
 }
 
-func (s *ScrollView) Initialize(drawCell DrawCellFn, emitEvent EmitEventFn) {
-	s.drawCell = drawCell
-	s.emitEvent = emitEvent
+func (s *ScrollView) Initialize(app *App, layer Layer) {
+	s.app = app
+	s.layer = layer
 
 	s.scrollPosition = 0
 
-	s.View.Initialize(drawCell, emitEvent)
+	s.View.Initialize(app, layer)
 }
 
 func (s *ScrollView) GetScrollPosition() int {
@@ -87,6 +87,6 @@ func (s *ScrollView) Find(path ...ViewID) (View, error) {
 
 func (s *ScrollView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
 	if s.visibleRect.Contains(x, y) {
-		s.drawCell(x, y, ch, fg, bg)
+		s.app.SetCell(s.layer, x, y, ch, fg, bg)
 	}
 }
