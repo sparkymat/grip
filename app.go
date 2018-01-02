@@ -10,10 +10,13 @@ import (
 )
 
 type EventHandler func(*App, event.Event)
+type DrawCellFn func(int, int, rune, termbox.Attribute, termbox.Attribute)
+type EmitEventFn func(event.Type, interface{})
 
 type App struct {
 	container            ViewContainer
 	globalEventListeners map[event.Type][]EventHandler
+	modalRect            Rect
 	modalContainer       ViewContainer
 	modalVisible         bool
 }
@@ -57,7 +60,7 @@ func (a *App) EmitModalEvent(eventType event.Type, data interface{}) {
 
 func (a *App) SetContainer(container *Grid) {
 	a.container = container
-	a.container.Initialize(a.EmitEvent)
+	a.container.Initialize(a.MainSetCell, a.EmitEvent)
 }
 
 func (a *App) SetModal(m *modal) {
@@ -69,7 +72,7 @@ func (a *App) SetModal(m *modal) {
 	modalGrid.AddView("modal", m, Area{1, 1, 1, 1})
 
 	a.modalContainer = &modalGrid
-	a.modalContainer.Initialize(a.EmitModalEvent)
+	a.modalContainer.Initialize(a.ModalSetCell, a.EmitModalEvent)
 }
 
 func (a App) Run() error {
@@ -145,6 +148,7 @@ func (a *App) Refresh() {
 		a.container.Draw()
 	}
 
+	a.modalRect = Rect{0, 0, 0, 0}
 	if a.modalVisible && a.modalContainer != nil {
 		a.modalContainer.Resize(
 			Rect{
@@ -160,6 +164,12 @@ func (a *App) Refresh() {
 				Height: height,
 			},
 		)
+		a.modalRect = Rect{
+			X:      a.modalContainer.(*Grid).columnWidths[0],
+			Y:      a.modalContainer.(*Grid).rowHeights[0],
+			Width:  a.modalContainer.(*Grid).columnWidths[1],
+			Height: a.modalContainer.(*Grid).rowHeights[1],
+		}
 		a.modalContainer.Draw()
 	}
 }
@@ -205,4 +215,14 @@ func (a *App) Find(path ...ViewID) (View, error) {
 	}
 
 	return nil, errors.New("View not found")
+}
+
+func (a *App) MainSetCell(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
+	if !a.modalVisible || a.modalContainer == nil || !a.modalRect.Contains(x, y) {
+		termbox.SetCell(x, y, ch, fg, bg)
+	}
+}
+
+func (a *App) ModalSetCell(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
+	termbox.SetCell(x, y, ch, fg, bg)
 }

@@ -13,7 +13,8 @@ const ProgressViewTypePercentage ProgressViewType = 0
 const ProgressViewTypeFraction ProgressViewType = 1
 
 type ProgressView struct {
-	emitEvent       func(event.Type, interface{})
+	drawCell        DrawCellFn
+	emitEvent       EmitEventFn
 	MinimumValue    int
 	CurrentValue    int
 	MaximumValue    int
@@ -24,8 +25,9 @@ type ProgressView struct {
 	visibleRect     Rect
 }
 
-func (p *ProgressView) Initialize(emit func(eventType event.Type, data interface{})) {
-	p.emitEvent = emit
+func (p *ProgressView) Initialize(drawCell DrawCellFn, emitEvent EmitEventFn) {
+	p.drawCell = drawCell
+	p.emitEvent = emitEvent
 }
 
 func (p *ProgressView) Resize(rect, visibleRect Rect) {
@@ -75,6 +77,6 @@ func (p *ProgressView) OnEvent(app *App, e event.Event) {
 
 func (p *ProgressView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
 	if p.visibleRect.Contains(x, y) {
-		termbox.SetCell(x, y, ch, fg, bg)
+		p.drawCell(x, y, ch, fg, bg)
 	}
 }

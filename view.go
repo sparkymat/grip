@@ -13,7 +13,7 @@ const ModalRoot ViewID = "modal-root"
 const WildCardPath ViewID = "*"
 
 type View interface {
-	Initialize(emitEvent func(eventType event.Type, data interface{}))
+	Initialize(drawCell DrawCellFn, emitEvent EmitEventFn)
 	OnEvent(app *App, e event.Event)
 	Resize(rect Rect, visibleRect Rect)
 	Draw()

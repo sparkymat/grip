@@ -9,7 +9,8 @@ import (
 )
 
 type Grid struct {
-	emitEvent       func(event.Type, interface{})
+	drawCell        DrawCellFn
+	emitEvent       EmitEventFn
 	HasBackground   bool
 	BackgroundColor termbox.Attribute
 	ColumnSizes     []size.Size
@@ -28,10 +29,12 @@ func (g *Grid) OnEvent(app *App, e event.Event) {
 	}
 }
 
-func (g *Grid) Initialize(emit func(eventType event.Type, data interface{})) {
-	g.emitEvent = emit
+func (g *Grid) Initialize(drawCell DrawCellFn, emitEvent EmitEventFn) {
+	g.drawCell = drawCell
+	g.emitEvent = emitEvent
+
 	for _, cell := range g.cells {
-		cell.view.Initialize(emit)
+		cell.view.Initialize(drawCell, emitEvent)
 	}
 }
 
@@ -187,6 +190,6 @@ func (g *Grid) Find(path ...ViewID) (View, error) {
 
 func (g *Grid) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
 	if g.visibleRect.Contains(x, y) {
-		termbox.SetCell(x, y, ch, fg, bg)
+		g.drawCell(x, y, ch, fg, bg)
 	}
 }

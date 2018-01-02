@@ -7,7 +7,8 @@ import (
 )
 
 type modal struct {
-	emitEvent func(event.Type, interface{})
+	drawCell  DrawCellFn
+	emitEvent EmitEventFn
 	grid      Grid
 	width     size.Size
 	height    size.Size
@@ -38,9 +39,11 @@ func NewModal(app *App, width size.Size, height size.Size, title View, body View
 	}
 }
 
-func (m *modal) Initialize(emit func(event.Type, interface{})) {
-	m.emitEvent = emit
-	m.grid.Initialize(emit)
+func (m *modal) Initialize(drawCell DrawCellFn, emitEvent EmitEventFn) {
+	m.drawCell = drawCell
+	m.emitEvent = emitEvent
+
+	m.grid.Initialize(drawCell, emitEvent)
 }
 
 func (m *modal) Draw() {

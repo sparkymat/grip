@@ -16,9 +16,10 @@ type AnimationFrame struct {
 }
 
 type AnimatedImageView struct {
+	drawCell       DrawCellFn
+	emitEvent      EmitEventFn
 	Frames         []AnimationFrame
 	LoopCount      int
-	emitEvent      func(event.Type, interface{})
 	imageView      ImageView
 	rect           Rect
 	visibleRect    Rect
@@ -49,9 +50,11 @@ func NewAnimatedImageViewForGifFile(filePath string) (AnimatedImageView, error) 
 	}, nil
 }
 
-func (ai *AnimatedImageView) Initialize(emit func(event.Type, interface{})) {
-	ai.emitEvent = emit
-	ai.imageView.Initialize(emit)
+func (ai *AnimatedImageView) Initialize(drawCell DrawCellFn, emitEvent EmitEventFn) {
+	ai.drawCell = drawCell
+	ai.emitEvent = emitEvent
+
+	ai.imageView.Initialize(drawCell, emitEvent)
 
 	ai.loopsRemaining = ai.LoopCount
 	ai.SetFrame(0)

@@ -9,7 +9,8 @@ import (
 )
 
 type ActivityView struct {
-	emitEvent       func(event.Type, interface{})
+	drawCell        DrawCellFn
+	emitEvent       EmitEventFn
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	Text            string
@@ -19,8 +20,9 @@ type ActivityView struct {
 	visibleRect     Rect
 }
 
-func (a *ActivityView) Initialize(emit func(eventType event.Type, data interface{})) {
-	a.emitEvent = emit
+func (a *ActivityView) Initialize(drawCell DrawCellFn, emitEvent EmitEventFn) {
+	a.drawCell = drawCell
+	a.emitEvent = emitEvent
 
 	a.progessX = a.rect.X + 1
 	a.speedX = 10
@@ -74,6 +76,6 @@ func (a *ActivityView) OnEvent(app *App, e event.Event) {
 
 func (a *ActivityView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
 	if a.visibleRect.Contains(x, y) {
-		termbox.SetCell(x, y, ch, fg, bg)
+		a.drawCell(x, y, ch, fg, bg)
 	}
 }

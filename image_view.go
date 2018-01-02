@@ -9,7 +9,8 @@ import (
 )
 
 type ImageView struct {
-	emitEvent       func(event.Type, interface{})
+	drawCell        DrawCellFn
+	emitEvent       EmitEventFn
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	Image           image.Image
@@ -18,8 +19,9 @@ type ImageView struct {
 	visibleRect     Rect
 }
 
-func (i *ImageView) Initialize(emit func(event.Type, interface{})) {
-	i.emitEvent = emit
+func (i *ImageView) Initialize(drawCell DrawCellFn, emitEvent EmitEventFn) {
+	i.drawCell = drawCell
+	i.emitEvent = emitEvent
 }
 
 func (i *ImageView) Resize(rect, visibleRect Rect) {
@@ -53,6 +55,6 @@ func (i *ImageView) OnEvent(app *App, e event.Event) {
 
 func (i *ImageView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
 	if i.visibleRect.Contains(x, y) {
-		termbox.SetCell(x, y, ch, fg, bg)
+		i.drawCell(x, y, ch, fg, bg)
 	}
 }

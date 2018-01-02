@@ -12,7 +12,8 @@ const TextAlignmentCenter TextAlignment = 1
 const TextAlignmentRight TextAlignment = 2
 
 type TextView struct {
-	emitEvent       func(eventType event.Type, data interface{})
+	emitEvent       EmitEventFn
+	drawCell        DrawCellFn
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	TextAlignment   TextAlignment
@@ -22,8 +23,9 @@ type TextView struct {
 	visibleRect     Rect
 }
 
-func (t *TextView) Initialize(emit func(eventType event.Type, data interface{})) {
-	t.emitEvent = emit
+func (t *TextView) Initialize(drawCell DrawCellFn, emitEvent EmitEventFn) {
+	t.drawCell = drawCell
+	t.emitEvent = emitEvent
 }
 
 func (t *TextView) Resize(rect, visibleRect Rect) {
@@ -39,7 +41,7 @@ func (t *TextView) Draw() {
 			endPosition = len(t.Text) - 1
 		}
 
-		var line string
+		line := ""
 		if startPosition < len(t.Text) {
 			line = t.Text[startPosition : endPosition+1]
 		}
@@ -74,7 +76,7 @@ func (t *TextView) Draw() {
 
 func (t *TextView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
 	if t.visibleRect.Contains(x, y) {
-		termbox.SetCell(x, y, ch, fg, bg)
+		t.drawCell(x, y, ch, fg, bg)
 	}
 }
 

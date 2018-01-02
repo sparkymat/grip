@@ -13,18 +13,23 @@ const ScrollDirectionHorizontal ScrollDirection = 0
 const ScrollDirectionVertical ScrollDirection = 1
 
 type ScrollView struct {
+	drawCell       DrawCellFn
+	emitEvent      EmitEventFn
 	View           View
 	Direction      ScrollDirection
 	Size           int
 	scrollPosition int
-	emitEvent      func(event.Type, interface{})
 	rect           Rect
 	visibleRect    Rect
 }
 
-func (s *ScrollView) Initialize(emit func(eventType event.Type, data interface{})) {
-	s.emitEvent = emit
+func (s *ScrollView) Initialize(drawCell DrawCellFn, emitEvent EmitEventFn) {
+	s.drawCell = drawCell
+	s.emitEvent = emitEvent
+
 	s.scrollPosition = 0
+
+	s.View.Initialize(drawCell, emitEvent)
 }
 
 func (s *ScrollView) GetScrollPosition() int {
@@ -51,7 +56,7 @@ func (s *ScrollView) Resize(rect, visibleRect Rect) {
 
 	switch s.Direction {
 	case ScrollDirectionHorizontal:
-		if s.scrollPosition+s.rect.Width > s.Size {
+		if s.scrollPosition+s.rect.Width >= s.Size {
 			s.scrollPosition -= (s.Size - s.rect.Width)
 		}
 		s.View.Resize(Rect{X: s.rect.X - s.scrollPosition, Y: s.rect.Y, Width: s.Size, Height: s.rect.Height}, s.rect)
@@ -82,6 +87,6 @@ func (s *ScrollView) Find(path ...ViewID) (View, error) {
 
 func (s *ScrollView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
 	if s.visibleRect.Contains(x, y) {
-		termbox.SetCell(x, y, ch, fg, bg)
+		s.drawCell(x, y, ch, fg, bg)
 	}
 }
