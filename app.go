@@ -93,8 +93,8 @@ func (a App) Run() error {
 	a.Refresh()
 	termbox.Flush()
 
-	// FIXME: FLush every 16 ms ?
-	refreshTicker := time.NewTicker(time.Millisecond * 16)
+	// FIXME: FPS set to 25
+	refreshTicker := time.NewTicker(time.Millisecond * 40)
 	go func() {
 		for t := range refreshTicker.C {
 			a.EmitEvent(AppLayer, event.SystemTick, t)

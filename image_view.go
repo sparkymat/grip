@@ -29,7 +29,7 @@ func (i *ImageView) Resize(rect, visibleRect Rect) {
 	i.visibleRect = visibleRect
 
 	if i.rect.Width > 0 {
-		i.scaleAscii = asciiart.Convert2AsciiOfWidth(i.Image, int(i.rect.Width)-1)
+		i.scaleAscii = asciiart.Convert2AsciiOfWidth(i.Image, i.rect.Width-1)
 	}
 }
 

@@ -7,18 +7,20 @@ import (
 	"time"
 
 	termbox "github.com/nsf/termbox-go"
+	asciiart "github.com/sparkymat/goasciiart"
 	"github.com/sparkymat/grip/event"
 )
 
 type AnimationFrame struct {
 	Image                image.Image
+	scaledAscii          []byte
 	DurationMilliseconds int
 }
 
 type AnimatedImageView struct {
 	app            *App
 	layer          Layer
-	Frames         []AnimationFrame
+	Frames         []*AnimationFrame
 	LoopCount      int
 	imageView      ImageView
 	rect           Rect
@@ -37,10 +39,10 @@ func NewAnimatedImageViewForGifFile(filePath string) (AnimatedImageView, error) 
 		return AnimatedImageView{}, err
 	}
 
-	frames := []AnimationFrame{}
+	frames := []*AnimationFrame{}
 
 	for index, img := range gifImage.Image {
-		frames = append(frames, AnimationFrame{img, gifImage.Delay[index] * 10})
+		frames = append(frames, &AnimationFrame{Image: img, DurationMilliseconds: gifImage.Delay[index] * 10})
 	}
 
 	return AnimatedImageView{
@@ -66,7 +68,7 @@ func (ai *AnimatedImageView) FrameCount() int {
 
 func (ai *AnimatedImageView) SetFrame(idx int) {
 	ai.imageView.Image = ai.Frames[idx].Image
-	ai.imageView.Resize(ai.rect, ai.visibleRect)
+	ai.imageView.scaleAscii = ai.Frames[idx].scaledAscii
 	ai.Draw()
 
 	if idx == len(ai.Frames)-1 && ai.loopsRemaining == 0 && ai.LoopCount != 0 {
@@ -92,6 +94,13 @@ func (ai *AnimatedImageView) SetFrame(idx int) {
 func (ai *AnimatedImageView) Resize(rect, visibleRect Rect) {
 	ai.rect = rect
 	ai.visibleRect = visibleRect
+	for _, frame := range ai.Frames {
+		var scaleAscii []byte
+		if visibleRect.Width > 0 {
+			scaleAscii = asciiart.Convert2AsciiOfWidth(frame.Image, visibleRect.Width-1)
+		}
+		frame.scaledAscii = scaleAscii
+	}
 	ai.imageView.Resize(rect, visibleRect)
 }
 
