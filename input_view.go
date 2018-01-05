@@ -11,6 +11,7 @@ type InputView struct {
 	app      *App
 	layer    Layer
 	TextView TextView
+	enabled  bool
 }
 
 func (t *InputView) Initialize(app *App, layer Layer) {
@@ -34,10 +35,17 @@ func (t *InputView) OnEvent(app *App, e event.Event) {
 		ev := e.Data.(termbox.Event)
 		switch ev.Type {
 		case termbox.EventKey:
-			var buffer bytes.Buffer
-			buffer.WriteString(t.TextView.Text)
-			buffer.WriteRune(ev.Ch)
-			t.TextView.Text = buffer.String()
+			switch ev.Key {
+			case termbox.KeyEsc:
+				t.Disable()
+			default:
+				if ev.Ch != 0 && t.enabled {
+					var buffer bytes.Buffer
+					buffer.WriteString(t.TextView.Text)
+					buffer.WriteRune(ev.Ch)
+					t.TextView.Text = buffer.String()
+				}
+			}
 			t.Draw()
 			return
 		}
@@ -47,4 +55,12 @@ func (t *InputView) OnEvent(app *App, e event.Event) {
 
 func (t *InputView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
 	t.TextView.SetCellIfVisible(x, y, ch, fg, bg)
+}
+
+func (t *InputView) Enable() {
+	t.enabled = true
+}
+
+func (t *InputView) Disable() {
+	t.enabled = false
 }

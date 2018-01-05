@@ -16,88 +16,101 @@ func OnEvent(app *App, e event.Event) {
 	switch e.Type {
 	case event.SystemKeyPress:
 		termboxEvent := e.Data.(termbox.Event)
-		if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyEsc {
-			app.Confirm("Are you sure you want to quit?", func(app *App) {
-				termbox.Close()
-				os.Exit(0)
-			}, func(app *App) {})
-		} else if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyF1 {
-			app.Alert("Hello", func(app *App) {})
-		} else if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyArrowLeft {
-			scrollViewView, err := app.Find(WildCardPath, "horizontal-scroll")
-			if err != nil {
-				panic("Unable to find horizontal-scroll")
+		if termboxEvent.Type == termbox.EventKey {
+			switch termboxEvent.Key {
+			case termbox.KeyEsc:
+				app.Confirm("Are you sure you want to quit?", func(app *App) {
+					termbox.Close()
+					os.Exit(0)
+				}, func(app *App) {})
+			case termbox.KeyF1:
+				app.Alert("Hello", func(app *App) {})
+			case termbox.KeyArrowLeft:
+				scrollViewView, err := app.Find(WildCardPath, "horizontal-scroll")
+				if err != nil {
+					panic("Unable to find horizontal-scroll")
+				}
+
+				scrollView, isScroll := scrollViewView.(*ScrollView)
+
+				if !isScroll {
+					panic("Unable to find horizontal-scroll of type ScrollView")
+				}
+
+				scrollView.ScrollTo(scrollView.GetScrollPosition() - 1)
+				scrollView.Draw()
+			case termbox.KeyArrowRight:
+				scrollViewView, err := app.Find(WildCardPath, "horizontal-scroll")
+				if err != nil {
+					panic("Unable to find horizontal-scroll")
+				}
+
+				scrollView, isScroll := scrollViewView.(*ScrollView)
+
+				if !isScroll {
+					panic("Unable to find horizontal-scroll of type ScrollView")
+				}
+
+				scrollView.ScrollTo(scrollView.GetScrollPosition() + 1)
+				scrollView.Draw()
+			case termbox.KeyArrowUp:
+				scrollViewView, err := app.Find(WildCardPath, "vertical-scroll")
+				if err != nil {
+					panic("Unable to find vertical-scroll")
+				}
+
+				scrollView, isScroll := scrollViewView.(*ScrollView)
+
+				if !isScroll {
+					panic("Unable to find vertical-scroll of type ScrollView")
+				}
+
+				scrollView.ScrollTo(scrollView.GetScrollPosition() - 1)
+				scrollView.Draw()
+			case termbox.KeyArrowDown:
+				scrollViewView, err := app.Find(WildCardPath, "vertical-scroll")
+				if err != nil {
+					panic("Unable to find vertical-scroll")
+				}
+
+				scrollView, isScroll := scrollViewView.(*ScrollView)
+
+				if !isScroll {
+					panic("Unable to find vertical-scroll of type ScrollView")
+				}
+
+				scrollView.ScrollTo(scrollView.GetScrollPosition() + 1)
+				scrollView.Draw()
+			case termbox.KeySpace:
+				manualProgressView, err := app.Find(WildCardPath, "manual-progress")
+				if err != nil {
+					panic("Unable to find manual-progress")
+				}
+
+				manualProgress, isProgress := manualProgressView.(*ProgressView)
+
+				if !isProgress {
+					panic("Unable to find manual-progress of type ProgressView")
+				}
+
+				manualProgress.CurrentValue += (rand.Int() % 200)
+				if manualProgress.CurrentValue > 1000 {
+					manualProgress.CurrentValue = 0
+				}
+				manualProgress.Draw()
+			case termbox.KeyF2:
+				inputView, err := app.Find(WildCardPath, "main-input")
+				if err != nil {
+					panic("Unable to find main-input")
+				}
+
+				mainInputView, isInputView := inputView.(*InputView)
+				if !isInputView {
+					panic("Unable to find main-input of type InputView")
+				}
+				mainInputView.Enable()
 			}
-
-			scrollView, isScroll := scrollViewView.(*ScrollView)
-
-			if !isScroll {
-				panic("Unable to find horizontal-scroll of type ScrollView")
-			}
-
-			scrollView.ScrollTo(scrollView.GetScrollPosition() - 1)
-			scrollView.Draw()
-		} else if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyArrowRight {
-			scrollViewView, err := app.Find(WildCardPath, "horizontal-scroll")
-			if err != nil {
-				panic("Unable to find horizontal-scroll")
-			}
-
-			scrollView, isScroll := scrollViewView.(*ScrollView)
-
-			if !isScroll {
-				panic("Unable to find horizontal-scroll of type ScrollView")
-			}
-
-			scrollView.ScrollTo(scrollView.GetScrollPosition() + 1)
-			scrollView.Draw()
-		} else if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyArrowUp {
-			scrollViewView, err := app.Find(WildCardPath, "vertical-scroll")
-			if err != nil {
-				panic("Unable to find vertical-scroll")
-			}
-
-			scrollView, isScroll := scrollViewView.(*ScrollView)
-
-			if !isScroll {
-				panic("Unable to find vertical-scroll of type ScrollView")
-			}
-
-			scrollView.ScrollTo(scrollView.GetScrollPosition() - 1)
-			scrollView.Draw()
-		} else if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeyArrowDown {
-			scrollViewView, err := app.Find(WildCardPath, "vertical-scroll")
-			if err != nil {
-				panic("Unable to find vertical-scroll")
-			}
-
-			scrollView, isScroll := scrollViewView.(*ScrollView)
-
-			if !isScroll {
-				panic("Unable to find vertical-scroll of type ScrollView")
-			}
-
-			scrollView.ScrollTo(scrollView.GetScrollPosition() + 1)
-			scrollView.Draw()
-		} else if termboxEvent.Type == termbox.EventKey && termboxEvent.Key == termbox.KeySpace {
-			manualProgressView, err := app.Find(WildCardPath, "manual-progress")
-			if err != nil {
-				panic("Unable to find manual-progress")
-			}
-
-			manualProgress, isProgress := manualProgressView.(*ProgressView)
-
-			if !isProgress {
-				panic("Unable to find manual-progress of type ProgressView")
-			}
-
-			manualProgress.CurrentValue += (rand.Int() % 200)
-			if manualProgress.CurrentValue > 1000 {
-				manualProgress.CurrentValue = 0
-			}
-			manualProgress.Draw()
 		}
-		break
 	}
 }
 
@@ -220,15 +233,16 @@ func TestSanity(t *testing.T) {
 
 	mainLayoutGrid.AddView("test-gif", &gifView, Area{0, 0, 0, 1})
 
-	mainGrid.AddView("main-layout", &mainLayoutGrid, Area{0, 0, 0, 0})
-	mainGrid.AddView("sidebar-grid", &sidebarGrid, Area{1, 1, 0, 1})
-	mainGrid.AddView("main-input", &InputView{
+	mainLayoutGrid.AddView("main-input", &InputView{
 		TextView: TextView{
 			Text:            "",
 			ForegroundColor: termbox.ColorRed,
 			BackgroundColor: termbox.ColorBlack,
 		},
-	}, Area{0, 0, 1, 1})
+	}, Area{1, 1, 1, 1})
+
+	mainGrid.AddView("main-layout", &mainLayoutGrid, Area{0, 0, 0, 0})
+	mainGrid.AddView("sidebar-grid", &sidebarGrid, Area{1, 1, 0, 1})
 
 	app.SetContainer(&mainGrid)
 	app.RegisterGlobalEventListener(event.SystemKeyPress, OnEvent)
