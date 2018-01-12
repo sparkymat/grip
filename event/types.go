@@ -1,6 +1,13 @@
 package event
 
-type Type string
+type Type int
 
-const SystemKeyPress Type = "system.keypress"
-const SystemTick Type = "system.tick"
+const (
+	EventKeyPress Type = iota
+	EventResize
+	EventTick
+	EventDrawCellRequest
+	EventShowModal
+	EventHideModal
+	EventRefresh
+)

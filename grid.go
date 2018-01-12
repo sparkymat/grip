@@ -8,45 +8,48 @@ import (
 	"github.com/sparkymat/grip/size"
 )
 
+type gridCell struct {
+	view View
+	area Area
+}
+
 type Grid struct {
-	app             *App
-	layer           Layer
+	setCellFn       SetCellFn
 	HasBackground   bool
 	BackgroundColor termbox.Attribute
 	ColumnSizes     []size.Size
 	RowSizes        []size.Size
-	cells           map[ViewID]cell
+	cells           map[ViewID]gridCell
 	columnWidths    []int
 	rowHeights      []int
 	rect            Rect
 	visibleRect     Rect
 }
 
-func (g *Grid) Initialize(app *App, layer Layer) {
-	g.app = app
-	g.layer = layer
+func (g *Grid) Initialize(setCellFn SetCellFn) {
+	g.setCellFn = setCellFn
 
 	for _, cell := range g.cells {
-		cell.view.Initialize(app, layer)
+		cell.view.Initialize(setCellFn)
 	}
 }
 
-func (g *Grid) OnEvent(app *App, e event.Event) {
+func (g *Grid) OnEvent(e event.Event) {
 	for _, cell := range g.cells {
-		cell.view.OnEvent(app, e)
+		cell.view.OnEvent(e)
 	}
 }
 
 func (g *Grid) AddView(id ViewID, v View, a Area) error {
 	if g.cells == nil {
-		g.cells = make(map[ViewID]cell)
+		g.cells = make(map[ViewID]gridCell)
 	}
 
 	if _, ok := g.cells[id]; ok {
 		panic("This view ID is already registered")
 	}
 
-	g.cells[id] = cell{v, a}
+	g.cells[id] = gridCell{v, a}
 
 	return nil
 }
@@ -55,8 +58,8 @@ func (g *Grid) Resize(rect, visibleRect Rect) {
 	g.rect = rect
 	g.visibleRect = visibleRect
 
-	g.columnWidths = distributeLength(rect.Width, g.ColumnSizes)
-	g.rowHeights = distributeLength(rect.Height, g.RowSizes)
+	g.columnWidths = distributeLength(rect.Size.Width, g.ColumnSizes)
+	g.rowHeights = distributeLength(rect.Size.Height, g.RowSizes)
 
 	for _, cell := range g.cells {
 		var xOffset int = 0
@@ -83,16 +86,12 @@ func (g *Grid) Resize(rect, visibleRect Rect) {
 
 		cell.view.Resize(
 			Rect{
-				X:      rect.X + xOffset,
-				Y:      rect.Y + yOffset,
-				Width:  viewWidth,
-				Height: viewHeight,
+				Point{rect.Origin.X + xOffset, rect.Origin.Y + yOffset},
+				Size{viewWidth, viewHeight},
 			},
 			Rect{
-				X:      rect.X + xOffset,
-				Y:      rect.Y + yOffset,
-				Width:  viewWidth,
-				Height: viewHeight,
+				Point{rect.Origin.X + xOffset, rect.Origin.Y + yOffset},
+				Size{viewWidth, viewHeight},
 			})
 	}
 }
@@ -135,9 +134,11 @@ func distributeLength(totalLength int, sizes []size.Size) []int {
 
 func (g *Grid) Draw() {
 	if g.HasBackground {
-		for j := g.rect.Y; j < g.rect.Y+g.rect.Height; j++ {
-			for i := g.rect.X; i < g.rect.X+g.rect.Width; i++ {
-				g.SetCellIfVisible(i, j, ' ', g.BackgroundColor, g.BackgroundColor)
+		for j := g.rect.Origin.Y; j < g.rect.Origin.Y+g.rect.Size.Height; j++ {
+			for i := g.rect.Origin.X; i < g.rect.Origin.X+g.rect.Size.Width; i++ {
+				if g.visibleRect.Contains(i, j) {
+					g.setCellFn(Point{i, j}, ColoredRune{' ', g.BackgroundColor, g.BackgroundColor})
+				}
 			}
 		}
 	}
@@ -185,10 +186,4 @@ func (g *Grid) Find(path ...ViewID) (View, error) {
 	}
 
 	return nil, nil
-}
-
-func (g *Grid) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
-	if g.visibleRect.Contains(x, y) {
-		g.app.SetCell(g.layer, x, y, ch, fg, bg)
-	}
 }

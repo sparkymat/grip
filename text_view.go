@@ -12,8 +12,7 @@ const TextAlignmentCenter TextAlignment = 1
 const TextAlignmentRight TextAlignment = 2
 
 type TextView struct {
-	app             *App
-	layer           Layer
+	setCellFn       SetCellFn
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	TextAlignment   TextAlignment
@@ -23,9 +22,8 @@ type TextView struct {
 	visibleRect     Rect
 }
 
-func (t *TextView) Initialize(app *App, layer Layer) {
-	t.app = app
-	t.layer = layer
+func (t *TextView) Initialize(setCellFn SetCellFn) {
+	t.setCellFn = setCellFn
 }
 
 func (t *TextView) Resize(rect, visibleRect Rect) {
@@ -34,9 +32,9 @@ func (t *TextView) Resize(rect, visibleRect Rect) {
 }
 
 func (t *TextView) Draw() {
-	for j := t.rect.Y; j <= (t.rect.Y + t.rect.Height - 1); j++ {
-		startPosition := (j - t.rect.Y) * t.rect.Width
-		endPosition := startPosition + t.rect.Width - 1
+	for j := t.rect.Origin.Y; j < t.rect.Origin.Y+t.rect.Size.Height; j++ {
+		startPosition := (j - t.rect.Origin.Y) * t.rect.Size.Width
+		endPosition := startPosition + t.rect.Size.Width - 1
 		if endPosition > len(t.Text)-1 {
 			endPosition = len(t.Text) - 1
 		}
@@ -46,21 +44,21 @@ func (t *TextView) Draw() {
 			line = t.Text[startPosition : endPosition+1]
 		}
 
-		if len(line) < t.rect.Width {
-			for i := t.rect.X; i <= (t.rect.X + t.rect.Width - 1); i++ {
+		if len(line) < t.rect.Size.Width {
+			for i := t.rect.Origin.X; i < t.rect.Origin.X+t.rect.Size.Width; i++ {
 				t.SetCellIfVisible(i, j, ' ', t.ForegroundColor, t.BackgroundColor)
 			}
 		}
 
 		if len(line) > 0 {
-			textStart := t.rect.X
+			textStart := t.rect.Origin.X
 			textEnd := textStart + len(line) - 1
 
 			if t.TextAlignment == TextAlignmentCenter {
-				textStart = t.rect.X + (t.rect.Width-len(line))/2
+				textStart = t.rect.Origin.X + (t.rect.Size.Width-len(line))/2
 				textEnd = textStart + len(line)
 			} else if t.TextAlignment == TextAlignmentRight {
-				textEnd = t.rect.X + t.rect.Width - 1
+				textEnd = t.rect.Origin.X + t.rect.Size.Width - 1
 				textStart = textEnd - len(line) + 1
 			}
 
@@ -74,11 +72,11 @@ func (t *TextView) Draw() {
 	}
 }
 
-func (t *TextView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
-	if t.visibleRect.Contains(x, y) {
-		t.app.SetCell(t.layer, x, y, ch, fg, bg)
-	}
+func (t *TextView) OnEvent(e event.Event) {
 }
 
-func (t *TextView) OnEvent(app *App, e event.Event) {
+func (t *TextView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
+	if t.visibleRect.Contains(x, y) {
+		t.setCellFn(Point{x, y}, ColoredRune{ch, fg, bg})
+	}
 }

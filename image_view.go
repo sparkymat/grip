@@ -9,8 +9,7 @@ import (
 )
 
 type ImageView struct {
-	app             *App
-	layer           Layer
+	setCellFn       SetCellFn
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	Image           image.Image
@@ -19,17 +18,16 @@ type ImageView struct {
 	visibleRect     Rect
 }
 
-func (i *ImageView) Initialize(app *App, layer Layer) {
-	i.app = app
-	i.layer = layer
+func (i *ImageView) Initialize(setCellFn SetCellFn) {
+	i.setCellFn = setCellFn
 }
 
 func (i *ImageView) Resize(rect, visibleRect Rect) {
 	i.rect = rect
 	i.visibleRect = visibleRect
 
-	if i.rect.Width > 0 {
-		i.scaleAscii = asciiart.Convert2AsciiOfWidth(i.Image, i.rect.Width-1)
+	if i.rect.Size.Width > 0 {
+		i.scaleAscii = asciiart.Convert2AsciiOfWidth(i.Image, i.rect.Size.Width-1)
 	}
 }
 
@@ -38,10 +36,10 @@ func (v *ImageView) Draw() {
 		return
 	}
 
-	for j := v.rect.Y; j <= (v.rect.Y + v.rect.Height - 1); j++ {
-		for i := v.rect.X + 1; i < (v.rect.X + v.rect.Width - 1); i++ {
+	for j := v.rect.Origin.Y; j <= (v.rect.Origin.Y + v.rect.Size.Height - 1); j++ {
+		for i := v.rect.Origin.X + 1; i < (v.rect.Origin.X + v.rect.Size.Width - 1); i++ {
 			var r rune = ' '
-			position := (j-v.rect.Y)*v.rect.Width + (i - v.rect.X)
+			position := (j-v.rect.Origin.Y)*v.rect.Size.Width + (i - v.rect.Origin.X)
 			if position < len(v.scaleAscii) {
 				r = rune(v.scaleAscii[position])
 			}
@@ -50,11 +48,11 @@ func (v *ImageView) Draw() {
 	}
 }
 
-func (i *ImageView) OnEvent(app *App, e event.Event) {
+func (i *ImageView) OnEvent(e event.Event) {
 }
 
 func (i *ImageView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
 	if i.visibleRect.Contains(x, y) {
-		i.app.SetCell(i.layer, x, y, ch, fg, bg)
+		i.setCellFn(Point{x, y}, ColoredRune{ch, fg, bg})
 	}
 }

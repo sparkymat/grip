@@ -8,17 +8,14 @@ import (
 )
 
 type InputView struct {
-	app      *App
-	layer    Layer
-	TextView TextView
-	enabled  bool
+	setCellFn SetCellFn
+	TextView  TextView
+	enabled   bool
 }
 
-func (t *InputView) Initialize(app *App, layer Layer) {
-	t.app = app
-	t.layer = layer
-
-	t.TextView.Initialize(app, layer)
+func (t *InputView) Initialize(setCellFn SetCellFn) {
+	t.setCellFn = setCellFn
+	t.TextView.Initialize(setCellFn)
 }
 
 func (t *InputView) Resize(rect, visibleRect Rect) {
@@ -29,9 +26,9 @@ func (t *InputView) Draw() {
 	t.TextView.Draw()
 }
 
-func (t *InputView) OnEvent(app *App, e event.Event) {
+func (t *InputView) OnEvent(e event.Event) {
 	switch e.Type {
-	case event.SystemKeyPress:
+	case event.EventKeyPress:
 		ev := e.Data.(termbox.Event)
 		switch ev.Type {
 		case termbox.EventKey:
@@ -51,10 +48,6 @@ func (t *InputView) OnEvent(app *App, e event.Event) {
 		}
 		return
 	}
-}
-
-func (t *InputView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
-	t.TextView.SetCellIfVisible(x, y, ch, fg, bg)
 }
 
 func (t *InputView) Enable() {

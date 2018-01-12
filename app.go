@@ -9,188 +9,150 @@ import (
 	"github.com/sparkymat/grip/size"
 )
 
-type EventHandler func(*App, event.Event)
-type DrawCellFn func(int, int, rune, termbox.Attribute, termbox.Attribute)
-type EmitEventFn func(event.Type, interface{})
-
-type Layer int
-
-const (
-	AppLayer Layer = iota
-	ModalLayer
-)
+type SetCellFn func(Point, ColoredRune)
+type EventHandler func(app *App, ev event.Event)
 
 type App struct {
-	container            ViewContainer
-	globalEventListeners map[event.Type][]EventHandler
-	modalRect            Rect
-	modalContainer       ViewContainer
-	modalVisible         bool
+	View          ViewContainer
+	eventChannel  chan event.Event
+	modalView     ViewContainer
+	showModal     bool
+	modalRect     Rect
+	eventHandlers map[event.Type][]EventHandler
 }
 
-func (a *App) RegisterGlobalEventListener(eventType event.Type, handler EventHandler) {
-	if a.globalEventListeners == nil {
-		a.globalEventListeners = make(map[event.Type][]EventHandler)
-	}
-
-	if _, ok := a.globalEventListeners[eventType]; !ok {
-		a.globalEventListeners[eventType] = []EventHandler{}
-	}
-
-	listeners := append(a.globalEventListeners[eventType], handler)
-	a.globalEventListeners[eventType] = listeners
-}
-
-func (a *App) EmitGlobalEvent(eventType event.Type, data interface{}) error {
-	if _, ok := a.globalEventListeners[eventType]; !ok {
-		return errors.New("Unregistered event")
-	}
-
-	for _, registeredHandler := range a.globalEventListeners[eventType] {
-		go registeredHandler(a, event.Event{eventType, data})
-	}
-
-	return nil
-}
-
-func (a *App) EmitEvent(layer Layer, eventType event.Type, data interface{}) {
-	if layer == AppLayer && a.container != nil {
-		go a.container.OnEvent(a, event.Event{Type: eventType, Data: data})
-	} else if layer == ModalLayer && a.modalVisible && a.modalContainer != nil {
-		go a.modalContainer.OnEvent(a, event.Event{Type: eventType, Data: data})
-	}
-}
-
-func (a *App) SetContainer(container *Grid) {
-	a.container = container
-	a.container.Initialize(a, AppLayer)
-}
-
-func (a *App) SetModal(m *modal) {
-	modalGrid := Grid{
-		ColumnSizes: []size.Size{size.Auto, m.width, size.Auto},
-		RowSizes:    []size.Size{size.Auto, m.height, size.Auto},
-	}
-
-	modalGrid.AddView("modal", m, Area{1, 1, 1, 1})
-
-	a.modalContainer = &modalGrid
-	a.modalContainer.Initialize(a, ModalLayer)
-}
-
-func (a App) Run() error {
+func (a *App) Run() {
 	err := termbox.Init()
 	if err != nil {
-		return err
+		panic(err.Error())
 	}
 	termbox.SetOutputMode(termbox.Output256)
 
 	defer termbox.Close()
 
-	// Draw initial
-	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
-	termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-	a.Refresh()
-	termbox.Flush()
+	a.eventChannel = make(chan (event.Event), 20) // For nested calls which write to the channel
+	go a.eventLoop()
 
-	// FIXME: FPS set to 25
-	refreshTicker := time.NewTicker(time.Millisecond * 40)
+	ticker := time.NewTicker(time.Millisecond * 40) // for 25fps
 	go func() {
-		for t := range refreshTicker.C {
-			a.EmitEvent(AppLayer, event.SystemTick, t)
-			a.EmitEvent(ModalLayer, event.SystemTick, t)
-			a.EmitGlobalEvent(event.SystemTick, t)
-			termbox.Flush()
+		for t := range ticker.C {
+			a.DispatchEvent(event.EventTick, t)
 		}
 	}()
+
+	// This will push to the channel (draw()) which will block if channel is busy
+	a.View.Initialize(a.SetCellApp)
+	a.Refresh()
 
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventResize:
-			termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-			a.Refresh()
-			termbox.Flush()
-			break
+			width, height := termbox.Size()
+			a.DispatchEvent(event.EventResize, Size{width, height})
 		case termbox.EventKey:
-
-			if a.modalVisible {
-				a.EmitEvent(ModalLayer, event.SystemKeyPress, ev)
-			} else {
-				a.EmitGlobalEvent(event.SystemKeyPress, ev)
-				a.EmitEvent(AppLayer, event.SystemKeyPress, ev)
-			}
-			break
+			a.DispatchEvent(event.EventKeyPress, ev)
 		case termbox.EventError:
 			panic(ev.Err)
 		}
 	}
-
-	refreshTicker.Stop()
-
-	return err
 }
 
 func (a *App) Refresh() {
+	a.eventChannel <- event.Event{event.EventRefresh, nil}
+}
+
+func (a *App) eventLoop() {
 	width, height := termbox.Size()
+	windowSize := Size{width, height}
+	windowPosition := Point{0, 0}
 
-	if a.container != nil {
-		a.container.Resize(
-			Rect{
-				X:      0,
-				Y:      0,
-				Width:  width,
-				Height: height,
-			},
-			Rect{
-				X:      0,
-				Y:      0,
-				Width:  width,
-				Height: height,
-			},
-		)
-		a.container.Draw()
-	}
+	for ev := range a.eventChannel {
+		switch ev.Type {
+		case event.EventRefresh:
+			a.View.Resize(Rect{windowPosition, windowSize}, Rect{windowPosition, windowSize})
+			a.View.Draw()
 
-	a.modalRect = Rect{0, 0, 0, 0}
-	if a.modalVisible && a.modalContainer != nil {
-		a.modalContainer.Resize(
-			Rect{
-				X:      0,
-				Y:      0,
-				Width:  width,
-				Height: height,
-			},
-			Rect{
-				X:      0,
-				Y:      0,
-				Width:  width,
-				Height: height,
-			},
-		)
-		a.modalRect = Rect{
-			X:      a.modalContainer.(*Grid).columnWidths[0],
-			Y:      a.modalContainer.(*Grid).rowHeights[0],
-			Width:  a.modalContainer.(*Grid).columnWidths[1],
-			Height: a.modalContainer.(*Grid).rowHeights[1],
+			if a.showModal && a.modalView != nil {
+				a.modalView.Resize(Rect{windowPosition, windowSize}, Rect{windowPosition, windowSize})
+				a.modalView.Draw()
+			}
+		case event.EventResize:
+			windowSize = ev.Data.(Size)
+			termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
+			a.Refresh()
+		case event.EventKeyPress:
+			a.handleEvent(ev)
+		case event.EventTick:
+			termbox.Flush()
+			a.handleEvent(ev)
+		case event.EventDrawCellRequest:
+			request := ev.Data.(DrawCellRequest)
+			termbox.SetCell(request.Position.X, request.Position.Y, request.Rune.Ch, request.Rune.ForegroundColor, request.Rune.BackgroundColor)
+		case event.EventShowModal:
+			modal := ev.Data.(*modal)
+			modalGrid := Grid{
+				ColumnSizes: []size.Size{size.Auto, modal.width, size.Auto},
+				RowSizes:    []size.Size{size.Auto, modal.height, size.Auto},
+			}
+			modalGrid.AddView("modal", modal, Area{1, 1, 1, 1})
+			a.modalView = &modalGrid
+
+			a.modalView.Initialize(a.SetCellModal)
+			a.showModal = true
+			a.modalView.Resize(Rect{windowPosition, windowSize}, Rect{windowPosition, windowSize})
+
+			a.Refresh()
+		case event.EventHideModal:
+			a.showModal = false
+			a.modalView = nil
+			a.Refresh()
+		default:
+			a.handleEvent(ev)
 		}
-		a.modalContainer.Draw()
 	}
 }
 
-func (a *App) ShowModal() error {
-	if a.modalContainer == nil {
-		return errors.New("No modal to show")
+func (a *App) handleEvent(ev event.Event) {
+	if a.showModal {
+		a.modalView.OnEvent(ev)
+	} else {
+		for _, handler := range a.eventHandlers[ev.Type] {
+			handler(a, ev)
+		}
+		a.View.OnEvent(ev)
+	}
+}
+
+func (a *App) DispatchEvent(ev event.Type, data interface{}) {
+	a.eventChannel <- event.Event{ev, data}
+}
+
+func (a *App) RegisterEventListener(ev event.Type, handler EventHandler) {
+	if a.eventHandlers == nil {
+		a.eventHandlers = make(map[event.Type][]EventHandler)
 	}
 
-	a.modalVisible = true
-	a.Refresh()
+	if _, hasHandlers := a.eventHandlers[ev]; !hasHandlers {
+		a.eventHandlers[ev] = []EventHandler{}
+	}
 
-	return nil
+	a.eventHandlers[ev] = append(a.eventHandlers[ev], handler)
+}
+
+func (a *App) ShowModal(modal *modal) {
+	a.eventChannel <- event.Event{event.EventShowModal, modal}
 }
 
 func (a *App) HideModal() {
-	a.modalVisible = false
-	a.Refresh()
+	a.eventChannel <- event.Event{event.EventHideModal, nil}
+}
+
+func (a *App) SetCellModal(position Point, ch ColoredRune) {
+	termbox.SetCell(position.X, position.Y, ch.Ch, ch.ForegroundColor, ch.BackgroundColor)
+}
+
+func (a *App) SetCellApp(position Point, ch ColoredRune) {
+	termbox.SetCell(position.X, position.Y, ch.Ch, ch.ForegroundColor, ch.BackgroundColor)
 }
 
 func (a *App) Find(path ...ViewID) (View, error) {
@@ -202,26 +164,20 @@ func (a *App) Find(path ...ViewID) (View, error) {
 	remainingPath := path[1:]
 
 	if currentID == WildCardPath {
-		if a.modalVisible {
-			if a.modalContainer != nil {
-				return a.modalContainer.Find(path...)
+		if a.showModal {
+			if a.modalView != nil {
+				return a.modalView.Find(path...)
 			}
 		} else {
-			if a.container != nil {
-				return a.container.Find(path...)
+			if a.View != nil {
+				return a.View.Find(path...)
 			}
 		}
-	} else if currentID == AppRoot && a.container != nil {
-		return a.container.Find(remainingPath...)
-	} else if currentID == ModalRoot && a.modalVisible && a.modalContainer != nil {
-		return a.modalContainer.Find(remainingPath...)
+	} else if currentID == AppRoot && a.View != nil {
+		return a.View.Find(remainingPath...)
+	} else if currentID == ModalRoot && a.showModal && a.modalView != nil {
+		return a.modalView.Find(remainingPath...)
 	}
 
 	return nil, errors.New("View not found")
-}
-
-func (a *App) SetCell(layer Layer, x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
-	if layer == ModalLayer || !(a.modalVisible && a.modalContainer != nil && a.modalRect.Contains(x, y)) {
-		termbox.SetCell(x, y, ch, fg, bg)
-	}
 }

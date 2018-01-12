@@ -13,8 +13,7 @@ const ProgressViewTypePercentage ProgressViewType = 0
 const ProgressViewTypeFraction ProgressViewType = 1
 
 type ProgressView struct {
-	app             *App
-	layer           Layer
+	setCellFn       SetCellFn
 	MinimumValue    int
 	CurrentValue    int
 	MaximumValue    int
@@ -25,9 +24,8 @@ type ProgressView struct {
 	visibleRect     Rect
 }
 
-func (p *ProgressView) Initialize(app *App, layer Layer) {
-	p.app = app
-	p.layer = layer
+func (p *ProgressView) Initialize(setCellFn SetCellFn) {
+	p.setCellFn = setCellFn
 }
 
 func (p *ProgressView) Resize(rect, visibleRect Rect) {
@@ -36,18 +34,18 @@ func (p *ProgressView) Resize(rect, visibleRect Rect) {
 }
 
 func (p *ProgressView) Draw() {
-	for j := p.rect.Y; j <= (p.rect.Y + p.rect.Height - 1); j++ {
-		p.SetCellIfVisible(p.rect.X, j, '[', p.ForegroundColor, p.BackgroundColor)
-		for i := p.rect.X + 1; i < (p.rect.X + p.rect.Width - 1); i++ {
+	for j := p.rect.Origin.Y; j <= (p.rect.Origin.Y + p.rect.Size.Height - 1); j++ {
+		p.SetCellIfVisible(p.rect.Origin.X, j, '[', p.ForegroundColor, p.BackgroundColor)
+		for i := p.rect.Origin.X + 1; i < (p.rect.Origin.X + p.rect.Size.Width - 1); i++ {
 			p.SetCellIfVisible(i, j, ' ', p.ForegroundColor, p.BackgroundColor)
 		}
-		p.SetCellIfVisible(p.rect.X+p.rect.Width-1, j, ']', p.ForegroundColor, p.BackgroundColor)
+		p.SetCellIfVisible(p.rect.Origin.X+p.rect.Size.Width-1, j, ']', p.ForegroundColor, p.BackgroundColor)
 
 		var fractionComplete float32 = 0.0
 		if p.MaximumValue != p.MinimumValue {
 			fractionComplete = float32(p.CurrentValue) / float32(p.MaximumValue-p.MinimumValue)
-			minX := p.rect.X + 1
-			maxX := p.rect.X + p.rect.Width - 2
+			minX := p.rect.Origin.X + 1
+			maxX := p.rect.Origin.X + p.rect.Size.Width - 2
 			currentMaxX := minX + int(float32(maxX-minX)*fractionComplete)
 			for i := minX; i <= currentMaxX; i++ {
 				p.SetCellIfVisible(i, j, '=', p.ForegroundColor, p.BackgroundColor)
@@ -64,7 +62,7 @@ func (p *ProgressView) Draw() {
 			displayText = fmt.Sprintf(" %.1f%% ", fractionComplete*100)
 			break
 		}
-		textX := p.rect.X + (p.rect.Width-len(displayText))/2
+		textX := p.rect.Origin.X + (p.rect.Size.Width-len(displayText))/2
 		for i := textX; i < textX+len(displayText); i++ {
 			char := rune(displayText[i-textX])
 			p.SetCellIfVisible(i, j, char, p.ForegroundColor, p.BackgroundColor)
@@ -72,11 +70,11 @@ func (p *ProgressView) Draw() {
 	}
 }
 
-func (p *ProgressView) OnEvent(app *App, e event.Event) {
+func (p *ProgressView) OnEvent(e event.Event) {
 }
 
 func (p *ProgressView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
 	if p.visibleRect.Contains(x, y) {
-		p.app.SetCell(p.layer, x, y, ch, fg, bg)
+		p.setCellFn(Point{x, y}, ColoredRune{ch, fg, bg})
 	}
 }

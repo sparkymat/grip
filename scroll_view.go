@@ -13,8 +13,7 @@ const ScrollDirectionHorizontal ScrollDirection = 0
 const ScrollDirectionVertical ScrollDirection = 1
 
 type ScrollView struct {
-	app            *App
-	layer          Layer
+	setCellFn      SetCellFn
 	View           View
 	Direction      ScrollDirection
 	Size           int
@@ -23,13 +22,10 @@ type ScrollView struct {
 	visibleRect    Rect
 }
 
-func (s *ScrollView) Initialize(app *App, layer Layer) {
-	s.app = app
-	s.layer = layer
-
+func (s *ScrollView) Initialize(setCellFn SetCellFn) {
+	s.setCellFn = setCellFn
 	s.scrollPosition = 0
-
-	s.View.Initialize(app, layer)
+	s.View.Initialize(setCellFn)
 }
 
 func (s *ScrollView) GetScrollPosition() int {
@@ -46,8 +42,8 @@ func (s *ScrollView) ScrollTo(scrollPosition int) {
 	}
 }
 
-func (s *ScrollView) OnEvent(app *App, e event.Event) {
-	s.View.OnEvent(app, e)
+func (s *ScrollView) OnEvent(e event.Event) {
+	s.View.OnEvent(e)
 }
 
 func (s *ScrollView) Resize(rect, visibleRect Rect) {
@@ -56,16 +52,28 @@ func (s *ScrollView) Resize(rect, visibleRect Rect) {
 
 	switch s.Direction {
 	case ScrollDirectionHorizontal:
-		if s.scrollPosition+s.rect.Width >= s.Size {
-			s.scrollPosition -= (s.Size - s.rect.Width)
+		if s.scrollPosition+s.rect.Size.Width >= s.Size {
+			s.scrollPosition -= (s.Size - s.rect.Size.Width)
 		}
-		s.View.Resize(Rect{X: s.rect.X - s.scrollPosition, Y: s.rect.Y, Width: s.Size, Height: s.rect.Height}, s.rect)
+		s.View.Resize(
+			Rect{
+				Point{s.rect.Origin.X - s.scrollPosition, s.rect.Origin.Y},
+				Size{s.Size, s.rect.Size.Height},
+			},
+			s.rect,
+		)
 		break
 	case ScrollDirectionVertical:
-		if s.scrollPosition > s.Size-s.rect.Height {
-			s.scrollPosition -= (s.Size - s.rect.Height)
+		if s.scrollPosition > s.Size-s.rect.Size.Height {
+			s.scrollPosition -= (s.Size - s.rect.Size.Height)
 		}
-		s.View.Resize(Rect{X: s.rect.X, Y: s.rect.Y - s.scrollPosition, Width: s.rect.Width, Height: s.Size}, s.rect)
+		s.View.Resize(
+			Rect{
+				Point{s.rect.Origin.X, s.rect.Origin.Y - s.scrollPosition},
+				Size{s.rect.Size.Width, s.Size},
+			},
+			s.rect,
+		)
 		break
 	}
 }
@@ -87,6 +95,6 @@ func (s *ScrollView) Find(path ...ViewID) (View, error) {
 
 func (s *ScrollView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
 	if s.visibleRect.Contains(x, y) {
-		s.app.SetCell(s.layer, x, y, ch, fg, bg)
+		s.setCellFn(Point{x, y}, ColoredRune{ch, fg, bg})
 	}
 }

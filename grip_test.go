@@ -4,6 +4,7 @@ import (
 	"image"
 	"math/rand"
 	"os"
+	"runtime/pprof"
 	"testing"
 	"time"
 
@@ -14,13 +15,14 @@ import (
 
 func OnEvent(app *App, e event.Event) {
 	switch e.Type {
-	case event.SystemKeyPress:
+	case event.EventKeyPress:
 		termboxEvent := e.Data.(termbox.Event)
 		if termboxEvent.Type == termbox.EventKey {
 			switch termboxEvent.Key {
 			case termbox.KeyEsc:
 				app.Confirm("Are you sure you want to quit?", func(app *App) {
 					termbox.Close()
+					pprof.StopCPUProfile()
 					os.Exit(0)
 				}, func(app *App) {})
 			case termbox.KeyF1:
@@ -166,7 +168,7 @@ func TestSanity(t *testing.T) {
 			if progress.CurrentValue > 1000 {
 				progress.CurrentValue = 0
 			}
-			progress.Draw()
+			app.Refresh()
 		}
 	}()
 	sidebarGrid.AddView("progress", &progress, Area{0, 0, 2, 2})
@@ -244,8 +246,11 @@ func TestSanity(t *testing.T) {
 	mainGrid.AddView("main-layout", &mainLayoutGrid, Area{0, 0, 0, 0})
 	mainGrid.AddView("sidebar-grid", &sidebarGrid, Area{1, 1, 0, 1})
 
-	app.SetContainer(&mainGrid)
-	app.RegisterGlobalEventListener(event.SystemKeyPress, OnEvent)
+	app.View = &mainGrid
+	app.RegisterEventListener(event.EventKeyPress, OnEvent)
+
+	pf, _ := os.Create("grip.pprof")
+	pprof.StartCPUProfile(pf)
 
 	app.Run()
 }

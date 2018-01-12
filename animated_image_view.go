@@ -18,8 +18,7 @@ type AnimationFrame struct {
 }
 
 type AnimatedImageView struct {
-	app            *App
-	layer          Layer
+	setCellFn      SetCellFn
 	Frames         []*AnimationFrame
 	LoopCount      int
 	imageView      ImageView
@@ -52,11 +51,9 @@ func NewAnimatedImageViewForGifFile(filePath string) (AnimatedImageView, error) 
 	}, nil
 }
 
-func (ai *AnimatedImageView) Initialize(app *App, layer Layer) {
-	ai.app = app
-	ai.layer = layer
-
-	ai.imageView.Initialize(app, layer)
+func (ai *AnimatedImageView) Initialize(setCellFn SetCellFn) {
+	ai.setCellFn = setCellFn
+	ai.imageView.Initialize(setCellFn)
 
 	ai.loopsRemaining = ai.LoopCount
 	ai.SetFrame(0)
@@ -96,8 +93,8 @@ func (ai *AnimatedImageView) Resize(rect, visibleRect Rect) {
 	ai.visibleRect = visibleRect
 	for _, frame := range ai.Frames {
 		var scaleAscii []byte
-		if visibleRect.Width > 0 {
-			scaleAscii = asciiart.Convert2AsciiOfWidth(frame.Image, visibleRect.Width-1)
+		if visibleRect.Size.Width > 0 {
+			scaleAscii = asciiart.Convert2AsciiOfWidth(frame.Image, visibleRect.Size.Width-1)
 		}
 		frame.scaledAscii = scaleAscii
 	}
@@ -108,9 +105,9 @@ func (ai *AnimatedImageView) Draw() {
 	ai.imageView.Draw()
 }
 
-func (ai *AnimatedImageView) OnEvent(app *App, e event.Event) {
+func (ai *AnimatedImageView) OnEvent(e event.Event) {
 }
 
 func (ai *AnimatedImageView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
-	ai.imageView.SetCellIfVisible(x, y, ch, fg, bg)
+	ai.setCellFn(Point{x, y}, ColoredRune{ch, fg, bg})
 }

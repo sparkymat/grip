@@ -1,24 +1,22 @@
 package grip
 
 import (
-	termbox "github.com/nsf/termbox-go"
 	"github.com/sparkymat/grip/event"
 	"github.com/sparkymat/grip/size"
 )
 
 type modal struct {
-	app     *App
-	layer   Layer
-	grid    Grid
-	width   size.Size
-	height  size.Size
-	title   View
-	body    View
-	footer  View
-	onEvent func(*App, event.Event)
+	setCellFn SetCellFn
+	grid      Grid
+	width     size.Size
+	height    size.Size
+	title     View
+	body      View
+	footer    View
+	onEvent   func(event.Event)
 }
 
-func NewModal(app *App, width size.Size, height size.Size, title View, body View, footer View, onEvent func(*App, event.Event)) modal {
+func NewModal(app *App, width size.Size, height size.Size, title View, body View, footer View, onEvent func(event.Event)) modal {
 	modalGrid := Grid{
 		ColumnSizes: []size.Size{size.Auto},
 		RowSizes:    []size.Size{size.WithPoints(1), size.Auto, size.WithPoints(3)},
@@ -39,11 +37,9 @@ func NewModal(app *App, width size.Size, height size.Size, title View, body View
 	}
 }
 
-func (m *modal) Initialize(app *App, layer Layer) {
-	m.app = app
-	m.layer = layer
-
-	m.grid.Initialize(app, layer)
+func (m *modal) Initialize(setCellFn SetCellFn) {
+	m.setCellFn = setCellFn
+	m.grid.Initialize(setCellFn)
 }
 
 func (m *modal) Draw() {
@@ -54,16 +50,12 @@ func (m *modal) Resize(rect, visibleRect Rect) {
 	m.grid.Resize(rect, visibleRect)
 }
 
-func (m *modal) OnEvent(app *App, ev event.Event) {
+func (m *modal) OnEvent(ev event.Event) {
 	if m.onEvent != nil {
-		m.onEvent(app, ev)
+		m.onEvent(ev)
 	}
 }
 
 func (m *modal) Find(path ...ViewID) (View, error) {
 	return m.grid.Find(path...)
-}
-
-func (m *modal) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
-	m.grid.SetCellIfVisible(x, y, ch, fg, bg)
 }

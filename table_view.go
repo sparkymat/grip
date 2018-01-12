@@ -7,8 +7,7 @@ import (
 )
 
 type TableView struct {
-	app             *App
-	layer           Layer
+	setCellFn       SetCellFn
 	grid            Grid
 	foregroundColor termbox.Attribute
 	backgroundColor termbox.Attribute
@@ -37,18 +36,17 @@ func NewTableView(columnSizes []size.Size, rowSizes []size.Size, foregroundColor
 	}
 }
 
-func (t *TableView) Initialize(app *App, layer Layer) {
-	t.app = app
-	t.layer = layer
+func (t *TableView) Initialize(setCellFn SetCellFn) {
+	t.setCellFn = setCellFn
 
-	t.grid.Initialize(app, layer)
+	t.grid.Initialize(setCellFn)
 }
 
 func (t *TableView) AddView(id ViewID, v View, a Area) {
 	t.grid.AddView(id, v, Area{a.ColumnStart*2 + 1, a.ColumnEnd*2 + 1, a.RowStart*2 + 1, a.RowEnd*2 + 1})
 }
 
-func (t *TableView) OnEvent(app *App, e event.Event) {
+func (t *TableView) OnEvent(e event.Event) {
 }
 
 func (t *TableView) Resize(rect, visibleRect Rect) {
@@ -60,12 +58,12 @@ func (t *TableView) Draw() {
 	junctionYs := []int{}
 
 	// Vertical
-	i := t.grid.rect.X
+	i := t.grid.rect.Origin.X
 	for idx, width := range t.grid.columnWidths {
 		if idx%2 == 0 {
 			junctionXs = append(junctionXs, i)
-			for j := t.grid.rect.Y; j < t.grid.rect.Y+t.grid.rect.Height; j++ {
-				t.SetCellIfVisible(i, j, '│', t.foregroundColor, t.backgroundColor)
+			for j := t.grid.rect.Origin.Y; j < t.grid.rect.Origin.Y+t.grid.rect.Size.Height; j++ {
+				t.setCellFn(Point{i, j}, ColoredRune{'│', t.foregroundColor, t.backgroundColor})
 			}
 		}
 
@@ -73,11 +71,11 @@ func (t *TableView) Draw() {
 	}
 
 	// Horizontal
-	j := t.grid.rect.Y
+	j := t.grid.rect.Origin.Y
 	for idx, height := range t.grid.rowHeights {
 		if idx%2 == 0 {
 			junctionYs = append(junctionYs, j)
-			for i := t.grid.rect.X; i < t.grid.rect.X+t.grid.rect.Width; i++ {
+			for i := t.grid.rect.Origin.X; i < t.grid.rect.Origin.X+t.grid.rect.Size.Width; i++ {
 				t.SetCellIfVisible(i, j, '─', t.foregroundColor, t.backgroundColor)
 			}
 		}
@@ -87,21 +85,21 @@ func (t *TableView) Draw() {
 
 	for _, i := range junctionXs {
 		for _, j := range junctionYs {
-			if i == t.grid.rect.X && j == t.grid.rect.Y {
+			if i == t.grid.rect.Origin.X && j == t.grid.rect.Origin.Y {
 				t.SetCellIfVisible(i, j, '┌', t.foregroundColor, t.backgroundColor)
-			} else if i == t.grid.rect.X && j == t.grid.rect.Y+t.grid.rect.Height-1 {
+			} else if i == t.grid.rect.Origin.X && j == t.grid.rect.Origin.Y+t.grid.rect.Size.Height-1 {
 				t.SetCellIfVisible(i, j, '└', t.foregroundColor, t.backgroundColor)
-			} else if i == t.grid.rect.X+t.grid.rect.Width-1 && j == t.grid.rect.Y {
+			} else if i == t.grid.rect.Origin.X+t.grid.rect.Size.Width-1 && j == t.grid.rect.Origin.Y {
 				t.SetCellIfVisible(i, j, '┐', t.foregroundColor, t.backgroundColor)
-			} else if i == t.grid.rect.X+t.grid.rect.Width-1 && j == t.grid.rect.Y+t.grid.rect.Height-1 {
+			} else if i == t.grid.rect.Origin.X+t.grid.rect.Size.Width-1 && j == t.grid.rect.Origin.Y+t.grid.rect.Size.Height-1 {
 				t.SetCellIfVisible(i, j, '┘', t.foregroundColor, t.backgroundColor)
-			} else if i == t.grid.rect.X {
+			} else if i == t.grid.rect.Origin.X {
 				t.SetCellIfVisible(i, j, '├', t.foregroundColor, t.backgroundColor)
-			} else if i == t.grid.rect.X+t.grid.rect.Width-1 {
+			} else if i == t.grid.rect.Origin.X+t.grid.rect.Size.Width-1 {
 				t.SetCellIfVisible(i, j, '┤', t.foregroundColor, t.backgroundColor)
-			} else if j == t.grid.rect.Y {
+			} else if j == t.grid.rect.Origin.Y {
 				t.SetCellIfVisible(i, j, '┬', t.foregroundColor, t.backgroundColor)
-			} else if j == t.grid.rect.Y+t.grid.rect.Height-1 {
+			} else if j == t.grid.rect.Origin.Y+t.grid.rect.Size.Height-1 {
 				t.SetCellIfVisible(i, j, '┴', t.foregroundColor, t.backgroundColor)
 			} else {
 				t.SetCellIfVisible(i, j, '┼', t.foregroundColor, t.backgroundColor)
@@ -117,5 +115,7 @@ func (t *TableView) Find(path ...ViewID) (View, error) {
 }
 
 func (t *TableView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
-	t.grid.SetCellIfVisible(x, y, ch, fg, bg)
+	if t.grid.visibleRect.Contains(x, y) {
+		t.setCellFn(Point{x, y}, ColoredRune{ch, fg, bg})
+	}
 }

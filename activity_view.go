@@ -9,8 +9,7 @@ import (
 )
 
 type ActivityView struct {
-	app             *App
-	layer           Layer
+	setCellFn       SetCellFn
 	BackgroundColor termbox.Attribute
 	ForegroundColor termbox.Attribute
 	Text            string
@@ -20,22 +19,21 @@ type ActivityView struct {
 	visibleRect     Rect
 }
 
-func (a *ActivityView) Initialize(app *App, layer Layer) {
-	a.app = app
-	a.layer = layer
+func (a *ActivityView) Initialize(setCellFn SetCellFn) {
+	a.setCellFn = setCellFn
 
-	a.progessX = a.rect.X + 1
+	a.progessX = a.rect.Origin.X + 1
 	a.speedX = 10
 
 	timer := time.NewTicker(time.Millisecond * 100)
 	go func() {
 		for _ = range timer.C {
-			a.progessX += (a.rect.Width / a.speedX)
-			if a.progessX >= a.rect.X+a.rect.Width-1 {
-				a.progessX = a.rect.X + a.rect.Width - 2
+			a.progessX += (a.rect.Size.Width / a.speedX)
+			if a.progessX >= a.rect.Origin.X+a.rect.Size.Width-1 {
+				a.progessX = a.rect.Origin.X + a.rect.Size.Width - 2
 				a.speedX *= -1
-			} else if a.progessX <= a.rect.X+1 {
-				a.progessX = a.rect.X + 1
+			} else if a.progessX <= a.rect.Origin.X+1 {
+				a.progessX = a.rect.Origin.X + 1
 				a.speedX *= -1
 			}
 			a.Draw()
@@ -49,20 +47,20 @@ func (a *ActivityView) Resize(rect, visibleRect Rect) {
 }
 
 func (a *ActivityView) Draw() {
-	for j := a.rect.Y; j <= (a.rect.Y + a.rect.Height - 1); j++ {
-		a.SetCellIfVisible(a.rect.X, j, '[', a.ForegroundColor, a.BackgroundColor)
-		a.SetCellIfVisible(a.rect.X+a.rect.Width-1, j, ']', a.ForegroundColor, a.BackgroundColor)
+	for j := a.rect.Origin.Y; j <= (a.rect.Origin.Y + a.rect.Size.Height - 1); j++ {
+		a.SetCellIfVisible(a.rect.Origin.X, j, '[', a.ForegroundColor, a.BackgroundColor)
+		a.SetCellIfVisible(a.rect.Origin.X+a.rect.Size.Width-1, j, ']', a.ForegroundColor, a.BackgroundColor)
 
-		for i := a.rect.X + 1; i < (a.rect.X + a.rect.Width - 1); i++ {
+		for i := a.rect.Origin.X + 1; i < (a.rect.Origin.X + a.rect.Size.Width - 1); i++ {
 			a.SetCellIfVisible(i, j, ' ', a.ForegroundColor, a.BackgroundColor)
 		}
-		if a.progessX >= a.rect.X && a.progessX <= a.rect.X+a.rect.Width-1 {
+		if a.progessX >= a.rect.Origin.X && a.progessX <= a.rect.Origin.X+a.rect.Size.Width-1 {
 			a.SetCellIfVisible(a.progessX, j, '=', a.ForegroundColor, a.BackgroundColor)
 		}
 
 		if len(a.Text) > 0 {
 			displayText := fmt.Sprintf(" %v ", a.Text)
-			textX := a.rect.X + (a.rect.Width-len(displayText))/2
+			textX := a.rect.Origin.X + (a.rect.Size.Width-len(displayText))/2
 			for i := textX; i < textX+len(displayText); i++ {
 				char := rune(displayText[i-textX])
 				a.SetCellIfVisible(i, j, char, a.ForegroundColor, a.BackgroundColor)
@@ -71,11 +69,11 @@ func (a *ActivityView) Draw() {
 	}
 }
 
-func (a *ActivityView) OnEvent(app *App, e event.Event) {
+func (a *ActivityView) OnEvent(e event.Event) {
 }
 
 func (a *ActivityView) SetCellIfVisible(x int, y int, ch rune, fg termbox.Attribute, bg termbox.Attribute) {
 	if a.visibleRect.Contains(x, y) {
-		a.app.SetCell(a.layer, x, y, ch, fg, bg)
+		a.setCellFn(Point{x, y}, ColoredRune{ch, fg, bg})
 	}
 }

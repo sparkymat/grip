@@ -1,21 +1,16 @@
 package grip
 
-import (
-	termbox "github.com/nsf/termbox-go"
-	"github.com/sparkymat/grip/event"
-)
+import "github.com/sparkymat/grip/event"
 
 type ViewID string
 
+const WildCardPath ViewID = "*"
 const AppRoot ViewID = "app-root"
 const ModalRoot ViewID = "modal-root"
 
-const WildCardPath ViewID = "*"
-
 type View interface {
-	Initialize(app *App, layer Layer)
-	OnEvent(app *App, e event.Event)
-	Resize(rect Rect, visibleRect Rect)
+	Initialize(setCellFn SetCellFn)
 	Draw()
-	SetCellIfVisible(int, int, rune, termbox.Attribute, termbox.Attribute)
+	Resize(rect, visibleRect Rect)
+	OnEvent(ev event.Event)
 }

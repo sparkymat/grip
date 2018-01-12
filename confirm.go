@@ -63,21 +63,20 @@ func (a *App) Confirm(message string, onConfirm func(*App), onDismiss func(*App)
 		&TextView{Text: "Confirm", ForegroundColor: termbox.ColorBlack | termbox.AttrBold, BackgroundColor: termbox.ColorWhite, TextAlignment: TextAlignmentCenter},
 		&body,
 		&footer,
-		func(app *App, ev event.Event) {
-			if ev.Type == event.SystemKeyPress {
+		func(ev event.Event) {
+			if ev.Type == event.EventKeyPress {
 				termboxEvent := ev.Data.(termbox.Event)
 
 				if termboxEvent.Key == termbox.KeyEsc || termboxEvent.Ch == 'n' || termboxEvent.Ch == 'N' {
-					app.HideModal()
-					onDismiss(app)
+					a.HideModal()
+					onDismiss(a)
 				} else if termboxEvent.Ch == 'y' || termboxEvent.Ch == 'Y' {
-					app.HideModal()
-					onConfirm(app)
+					a.HideModal()
+					onConfirm(a)
 				}
 			}
 		},
 	)
 
-	a.SetModal(&m)
-	a.ShowModal()
+	a.ShowModal(&m)
 }
