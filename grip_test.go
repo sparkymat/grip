@@ -4,7 +4,6 @@ import (
 	"image"
 	"math/rand"
 	"os"
-	"runtime/pprof"
 	"testing"
 	"time"
 
@@ -22,7 +21,6 @@ func OnEvent(app *App, e event.Event) {
 			case termbox.KeyEsc:
 				app.Confirm("Are you sure you want to quit?", func(app *App) {
 					termbox.Close()
-					pprof.StopCPUProfile()
 					os.Exit(0)
 				}, func(app *App) {})
 			case termbox.KeyF1:
@@ -248,9 +246,6 @@ func TestSanity(t *testing.T) {
 
 	app.View = &mainGrid
 	app.RegisterEventListener(event.EventKeyPress, OnEvent)
-
-	pf, _ := os.Create("grip.pprof")
-	pprof.StartCPUProfile(pf)
 
 	app.Run()
 }

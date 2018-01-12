@@ -47,8 +47,7 @@ func (a *App) Run() {
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventResize:
-			width, height := termbox.Size()
-			a.DispatchEvent(event.EventResize, Size{width, height})
+			a.Refresh()
 		case termbox.EventKey:
 			a.DispatchEvent(event.EventKeyPress, ev)
 		case termbox.EventError:
@@ -58,28 +57,23 @@ func (a *App) Run() {
 }
 
 func (a *App) Refresh() {
-	a.eventChannel <- event.Event{event.EventRefresh, nil}
-}
-
-func (a *App) eventLoop() {
 	width, height := termbox.Size()
 	windowSize := Size{width, height}
 	windowPosition := Point{0, 0}
 
+	a.View.Resize(Rect{windowPosition, windowSize}, Rect{windowPosition, windowSize})
+	a.View.Draw()
+
+	if a.showModal && a.modalView != nil {
+		a.modalView.Resize(Rect{windowPosition, windowSize}, Rect{windowPosition, windowSize})
+		a.modalRect = a.modalView.(*Grid).cells["modal"].view.(*modal).grid.rect
+		a.modalView.Draw()
+	}
+}
+
+func (a *App) eventLoop() {
 	for ev := range a.eventChannel {
 		switch ev.Type {
-		case event.EventRefresh:
-			a.View.Resize(Rect{windowPosition, windowSize}, Rect{windowPosition, windowSize})
-			a.View.Draw()
-
-			if a.showModal && a.modalView != nil {
-				a.modalView.Resize(Rect{windowPosition, windowSize}, Rect{windowPosition, windowSize})
-				a.modalView.Draw()
-			}
-		case event.EventResize:
-			windowSize = ev.Data.(Size)
-			termbox.Clear(termbox.ColorDefault, termbox.ColorDefault)
-			a.Refresh()
 		case event.EventKeyPress:
 			a.handleEvent(ev)
 		case event.EventTick:
@@ -99,7 +93,6 @@ func (a *App) eventLoop() {
 
 			a.modalView.Initialize(a.SetCellModal)
 			a.showModal = true
-			a.modalView.Resize(Rect{windowPosition, windowSize}, Rect{windowPosition, windowSize})
 
 			a.Refresh()
 		case event.EventHideModal:
@@ -152,7 +145,9 @@ func (a *App) SetCellModal(position Point, ch ColoredRune) {
 }
 
 func (a *App) SetCellApp(position Point, ch ColoredRune) {
-	termbox.SetCell(position.X, position.Y, ch.Ch, ch.ForegroundColor, ch.BackgroundColor)
+	if !a.showModal || !a.modalRect.Contains(position.X, position.Y) {
+		termbox.SetCell(position.X, position.Y, ch.Ch, ch.ForegroundColor, ch.BackgroundColor)
+	}
 }
 
 func (a *App) Find(path ...ViewID) (View, error) {
